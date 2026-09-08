@@ -16,6 +16,7 @@
 .raceevent{background:#fff7ed!important;border-color:#fdba74!important}.block.raceevent{border-left-color:var(--race)!important}.agendaEvent.raceevent{border-left-color:var(--race)!important}
 .notifybtn{position:relative;border:0;background:#eef2f6;border-radius:999px;width:38px;height:38px;font-size:18px;flex:none}.notifybtn.enabled{background:#dbeafe}.notifybadge{position:absolute;right:-3px;top:-4px;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:#dc2626;color:#fff;border:2px solid #f4f6f8;font-size:10px;font-weight:900;display:grid;place-items:center}.notifybadge:empty{display:none}
 @media(max-width:700px){#detailDialog{width:100%;max-width:none;height:100dvh;max-height:none;margin:0;border-radius:0}#detailDialog .dialogbody{padding:calc(18px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom))}}
+.login.hide{display:none}
 </style>
 </head>
 <body>
@@ -72,7 +73,7 @@
 <script>
 const SUPA='https://gjplhfinujyhjxpahcak.supabase.co';
 const KEY='sb_publishable_8WLfOB17Uhnyd9jNWFdyDA_ewE7yxVO';
-const APP_VERSION='2026.09.08.3';
+const APP_VERSION='2026.09.08.4';
 const FAMILY_USERS=['Igor','Mirari','Joane','Laia','Alain'];
 function canonicalUser(name){let value=String(name||'').trim().toLocaleLowerCase('es');return FAMILY_USERS.find(x=>x.toLocaleLowerCase('es')===value)||''}
 let CODE=localStorage.getItem('family_code')||'',USER=canonicalUser(localStorage.getItem('family_user')),D={events:[],shopping:[],recurring:[],members:[],school_calendar:[]},W=new Date(),M=new Date(),S=new Date(),C='Todos',MONTH_MODE=localStorage.getItem('family_month_mode')||(matchMedia('(max-width:700px)').matches?'agenda':'calendar'),EDIT_SHOP=null,EDIT_PLAN=null,EDIT_HEALTH=null,EDIT_ROUTINE=null,EDIT_DOC=null,DOCS=[],DOC_REVEALED=new Set(),CALENDAR_EVENT=null;
