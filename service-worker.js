@@ -1,7 +1,12 @@
 const APP_PATCH_VERSION='2026.09.08.6';
 
 self.addEventListener('install',()=>self.skipWaiting());
-self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
+self.addEventListener('activate',event=>event.waitUntil((async()=>{
+  await caches.keys().then(keys=>Promise.all(keys.map(key=>caches.delete(key))));
+  await self.clients.claim();
+  const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true});
+  await Promise.all(clients.map(client=>client.navigate(client.url).catch(()=>null)));
+})()));
 
 self.addEventListener('fetch',event=>{
   const request=event.request;
