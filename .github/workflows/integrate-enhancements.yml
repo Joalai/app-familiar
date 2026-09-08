@@ -1,0 +1,39 @@
+name: Integrate app enhancements
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app-enhancements.js'
+      - '.github/workflows/integrate-enhancements.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Integrate enhancements in index
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          s=s.replace("const APP_VERSION='2026.09.08.5';", "const APP_VERSION='2026.09.08.7';")
+          if 'app-enhancements.js?v=2026.09.08.7' not in s:
+              s=s.replace('</body>', '<script src="app-enhancements.js?v=2026.09.08.7"></script></body>')
+          p.write_text(s)
+          Path('version.json').write_text('{"version":"2026.09.08.7"}\n')
+          PY
+      - name: Commit integrated page
+        shell: bash
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html version.json
+          git commit -m "Integrate calendar multi-select in main app"
+          git push
