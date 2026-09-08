@@ -6,6 +6,7 @@ on:
     paths:
       - 'app-enhancements.js'
       - 'calendar-races-update.js'
+      - 'packing.js'
       - '.github/workflows/integrate-enhancements.yml'
 
 permissions:
@@ -21,18 +22,19 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
+          VERSION='2026.09.09.1'
           p=Path('index.html')
           s=p.read_text()
-          import re
-          s=re.sub(r"const APP_VERSION='[^']+';", "const APP_VERSION='2026.09.08.8';", s)
-          s=re.sub(r'<script src="app-enhancements\.js\?v=[^"]+"></script>', '<script src="app-enhancements.js?v=2026.09.08.8"></script>', s)
-          if 'app-enhancements.js?v=2026.09.08.8' not in s:
-              s=s.replace('</body>', '<script src="app-enhancements.js?v=2026.09.08.8"></script></body>')
-          s=re.sub(r'<script src="calendar-races-update\.js\?v=[^"]+"></script>', '<script src="calendar-races-update.js?v=2026.09.08.8"></script>', s)
-          if 'calendar-races-update.js?v=2026.09.08.8' not in s:
-              s=s.replace('</body>', '<script src="calendar-races-update.js?v=2026.09.08.8"></script></body>')
+          s=re.sub(r"const APP_VERSION='[^']+';", f"const APP_VERSION='{VERSION}';", s)
+          for script in ['app-enhancements.js','calendar-races-update.js','packing.js']:
+              pat=rf'<script src="{re.escape(script)}\?v=[^"]+"></script>'
+              tag=f'<script src="{script}?v={VERSION}"></script>'
+              s=re.sub(pat,tag,s)
+              if tag not in s:
+                  s=s.replace('</body>',tag+'</body>')
           p.write_text(s)
-          Path('version.json').write_text('{"version":"2026.09.08.8"}\n')
+          Path('version.json').write_text('{"version":"'+VERSION+'"}\n')
           PY
       - name: Commit integrated page
         shell: bash
@@ -41,5 +43,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html version.json
-          git commit -m "Publish optional races and hide past calendar items"
+          git commit -m "Publish packing lists and race date corrections"
           git push
