@@ -9,6 +9,7 @@ on:
       - 'packing.js'
       - 'navigation-fix.js'
       - 'home-dashboard.js'
+      - 'home-upcoming-races.js'
       - '.github/workflows/integrate-enhancements.yml'
 
 permissions:
@@ -27,11 +28,11 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           import re
-          VERSION='2026.09.09.4'
+          VERSION='2026.09.09.5'
           p=Path('index.html')
           s=p.read_text()
           s=re.sub(r"const APP_VERSION='[^']+';", f"const APP_VERSION='{VERSION}';", s)
-          for script in ['app-enhancements.js','calendar-races-update.js','packing.js','navigation-fix.js','home-dashboard.js']:
+          for script in ['app-enhancements.js','calendar-races-update.js','packing.js','navigation-fix.js','home-dashboard.js','home-upcoming-races.js']:
               pat=rf'<script src="{re.escape(script)}\?v=[^"]+"></script>'
               tag=f'<script src="{script}?v={VERSION}"></script>'
               s=re.sub(pat,tag,s)
@@ -47,6 +48,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html version.json
-          git commit -m "Publish home dashboard and race chronology"
+          git commit -m "Publish optional races in upcoming"
           git pull --rebase origin main
           git push origin main
