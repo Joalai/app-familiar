@@ -1,4 +1,4 @@
-const APP_PATCH_VERSION='2026.09.08.6';
+const APP_PATCH_VERSION='2026.09.09.1';
 
 self.addEventListener('install',()=>self.skipWaiting());
 self.addEventListener('activate',event=>event.waitUntil((async()=>{
@@ -19,7 +19,10 @@ self.addEventListener('fetch',event=>{
       if(!type.includes('text/html'))return response;
       let html=await response.text();
       html=html.replace(/const APP_VERSION='[^']+';/,"const APP_VERSION='"+APP_PATCH_VERSION+"';");
-      if(!html.includes('app-enhancements.js'))html=html.replace('</body>','<script src="app-enhancements.js?v='+APP_PATCH_VERSION+'"></script></body>');
+      const scripts=['app-enhancements.js','calendar-races-update.js','packing.js'];
+      for(const script of scripts){
+        if(!html.includes(script))html=html.replace('</body>','<script src="'+script+'?v='+APP_PATCH_VERSION+'"></script></body>');
+      }
       const headers=new Headers(response.headers);
       headers.set('cache-control','no-store');
       headers.delete('content-length');
