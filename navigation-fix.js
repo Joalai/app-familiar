@@ -18,8 +18,9 @@
       else if(v==='routines'&&typeof rroutines==='function')rroutines();
       else if(v==='sports'&&typeof rs==='function')rs();
       else if(v==='cal'&&typeof rc==='function')rc();
-      else if(v==='packing'&&typeof window.familyPackingLoad==='function')window.familyPackingLoad();
-    }catch(err){console.error('Error al renderizar '+v,err)}
+    }catch(err){
+      console.error('Error al renderizar '+v,err);
+    }
   }
 
   function safeOpen(v){
@@ -27,31 +28,26 @@
     if(current==='documents'&&v!=='documents'){
       try{
         const dirty=(document.getElementById('docNumber')?.value||document.getElementById('docExpiry')?.value);
-        if(dirty&&!confirm('Hay cambios de documentación sin guardar. ¿Salir igualmente?'))return;
+        if(dirty&&!confirm('Hay cambios de documentación sin guardar. ¿Salir igualmente?'))return false;
         if(typeof lockDocuments==='function')lockDocuments();
       }catch(e){}
     }
-    if(!activateView(v))return;
+    if(!activateView(v))return false;
     renderView(v);
-    try{window.scrollTo({top:0,behavior:'instant'})}catch(e){window.scrollTo(0,0)}
+    try{window.scrollTo({top:0,left:0,behavior:'auto'})}catch(e){window.scrollTo(0,0)}
+    return true;
   }
 
-  // Delegación única: funciona también para botones que se añaden después, como Maleta.
-  document.addEventListener('click',e=>{
-    const b=e.target.closest('#nav button[data-v]');
-    if(!b)return;
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    safeOpen(b.dataset.v);
-  },true);
+  // Sustituye la navegación original por una versión que primero cambia de pantalla
+  // y después intenta renderizarla. Así un error interno no bloquea el cambio de sección.
+  try{window.show=safeOpen}catch(e){}
 
-  // También refuerza taps en iOS cuando la barra se ha desplazado horizontalmente.
-  document.addEventListener('touchend',e=>{
+  // Refuerzo para cualquier botón del menú que no tenga onclick propio.
+  document.addEventListener('click',e=>{
     const b=e.target.closest?.('#nav button[data-v]');
-    if(!b)return;
-    e.preventDefault();
+    if(!b||typeof b.onclick==='function')return;
     safeOpen(b.dataset.v);
-  },{capture:true,passive:false});
+  });
 
   window.familySafeOpen=safeOpen;
 })();
