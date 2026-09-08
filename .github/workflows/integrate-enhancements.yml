@@ -26,7 +26,7 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           import re
-          VERSION='2026.09.09.2'
+          VERSION='2026.09.09.3'
           p=Path('index.html')
           s=p.read_text()
           s=re.sub(r"const APP_VERSION='[^']+';", f"const APP_VERSION='{VERSION}';", s)
@@ -46,6 +46,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html version.json
-          git commit -m "Publish navigation fix"
+          git commit -m "Publish packing category order"
           git pull --rebase origin main
           git push origin main
