@@ -17,6 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Integrate enhancements in index
         shell: bash
         run: |
@@ -44,4 +46,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html version.json
           git commit -m "Publish packing lists and race date corrections"
-          git push
+          git pull --rebase origin main
+          git push origin main
