@@ -74,7 +74,7 @@
 <script>
 const SUPA='https://gjplhfinujyhjxpahcak.supabase.co';
 const KEY='sb_publishable_8WLfOB17Uhnyd9jNWFdyDA_ewE7yxVO';
-const APP_VERSION='2026.09.08.5';
+const APP_VERSION='2026.09.08.7';
 const FAMILY_USERS=['Igor','Mirari','Joane','Laia','Alain'];
 function canonicalUser(name){let value=String(name||'').trim().toLocaleLowerCase('es');return FAMILY_USERS.find(x=>x.toLocaleLowerCase('es')===value)||''}
 let CODE=localStorage.getItem('family_code')||'',USER=canonicalUser(localStorage.getItem('family_user')),D={events:[],shopping:[],recurring:[],members:[],school_calendar:[]},W=new Date(),M=new Date(),S=new Date(),C='Todos',MONTH_MODE=localStorage.getItem('family_month_mode')||(matchMedia('(max-width:700px)').matches?'agenda':'calendar'),EDIT_SHOP=null,EDIT_PLAN=null,EDIT_HEALTH=null,EDIT_ROUTINE=null,EDIT_DOC=null,DOCS=[],DOC_REVEALED=new Set(),CALENDAR_EVENT=null;
@@ -232,4 +232,4 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 setInterval(()=>{if(CODE&&document.visibilityState==='visible')load()},60000);
 function initCompactForms(){[['planform','Cumples y planes','Añadir plan'],['healthform','Salud','Añadir cita'],['routineform','Rutinas','Añadir rutina']].forEach(([id,title,label])=>{let form=$(id),container=form.parentElement,drawer=document.createElement('details'),summary=document.createElement('summary');container.classList.add('compactTools');drawer.className='formDrawer';drawer.id=id+'Drawer';summary.innerHTML=esc(title)+'<span>＋ '+esc(label)+'</span>';drawer.append(summary);container.insertBefore(drawer,form);drawer.append(form)})}
 initCompactForms();
-</script></body></html>
+</script><script src="app-enhancements.js?v=2026.09.08.7"></script></body></html>
