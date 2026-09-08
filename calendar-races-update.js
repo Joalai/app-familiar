@@ -2,70 +2,17 @@
   'use strict';
 
   const OPTIONAL_RACES=[
-    {
-      id:'candidate-ponle-freno-bilbao-2026',title:'Ponle Freno Bilbao 10K',
-      event_date:'2026-09-20',start_time:'10:30',distance:'10 km',place:'Bilbao',finish:'Bilbao',
-      optional:true,date_state:'confirmed',status_text:'Opcional',date_text:'20 septiembre 2026 · 10:30 · fecha confirmada',
-      notes:'Edición de Bilbao 2026 confirmada. Participación de Igor todavía no confirmada.',
-      source_url:'https://www.atresmedia.com/ponle-freno/carreras/2026/bilbao/reglamento-carrera-ponle-freno-bilbao-2026_202608266a8c17027b9bc81c9ed6e392.html',sort_date:'2026-09-20'
-    },
-    {
-      id:'candidate-media-getxo-2027',title:'Media Maratón de Getxo',
-      event_date:'2027-04-04',start_time:'09:00',distance:'21,097 km',place:'Getxo',finish:'Getxo',
-      optional:true,date_state:'confirmed',status_text:'Opcional',date_text:'4 abril 2027 · 09:00 · fecha confirmada',
-      notes:'IV edición. La fecha de 2027 ya está publicada; participación de Igor todavía no confirmada.',
-      source_url:'https://www.bizkaia.eus/es/kirolbidepro/evento-detalle/-/asset_publisher/hAfe1q5ipej5/content/inscripcion-media-maraton-de-getxo-2027/880303',sort_date:'2027-04-04'
-    },
-    {
-      id:'candidate-zazpi-trokak-2027',title:'Zazpi Trokak Galdakao',
-      event_date:null,start_time:null,distance:'22–23 km / modalidad corta ~16 km',place:'Galdakao',finish:'Galdakao',
-      optional:true,date_state:'pending',status_text:'Opcional',date_text:'Abril 2027 · día pendiente de publicación',
-      notes:'Las ediciones recientes se han celebrado en abril (2025 y 2026). Se usa abril solo para situarla mentalmente; no hay día de 2027 confirmado.',
-      source_url:'https://www.gangurenmt.net/',sort_date:'2027-04-15',sort_is_approx:true
-    },
-    {
-      id:'candidate-vitoria-2027',title:'Vitoria-Gasteiz Maratón Martín Fiz',
-      event_date:'2027-05-16',start_time:'08:30',distance:'42,195 km',place:'Mendizorroza, Vitoria-Gasteiz',finish:'Vitoria-Gasteiz',
-      optional:true,date_state:'confirmed',status_text:'Opcional',date_text:'16 mayo 2027 · 08:30 · fecha confirmada',
-      notes:'La organización ya publica la edición 2027. Participación de Igor todavía no confirmada.',
-      source_url:'https://www.maratonmartinfiz.com/',sort_date:'2027-05-16'
-    },
-    {
-      id:'candidate-empresas-bilbao-2027',title:'Carrera de Empresas Bilbao',
-      event_date:null,start_time:null,distance:'6 km aprox.',place:'Bilbao',finish:'Bilbao',
-      optional:true,date_state:'pending',status_text:'Opcional',date_text:'Junio 2027 · día pendiente de publicación',
-      notes:'La edición 2026 se celebró el 7 de junio. Junio se usa únicamente como referencia de colocación hasta que se publique la edición 2027.',
-      source_url:'https://www.carrera-empresas.com/',sort_date:'2027-06-15',sort_is_approx:true
-    },
-    {
-      id:'candidate-hiri-krosa-2027',title:'Hiri Krosa Aste Nagusia',
-      event_date:null,start_time:null,distance:'6 km aprox.',place:'Bilbao',finish:'Bilbao',
-      optional:true,date_state:'pending',status_text:'Opcional',date_text:'Agosto 2027 · Aste Nagusia · día pendiente',
-      notes:'Es una prueba de Aste Nagusia. Se coloca en agosto para visualizarla en la temporada, pero el día de 2027 todavía no está publicado.',
-      source_url:'https://www.bilbokokonpartsak.eus/aste-nagusia/hiri-krosa?lang=es',sort_date:'2027-08-25',sort_is_approx:true
-    },
-    {
-      id:'candidate-milla-bakio-2027',title:'Milla Popular de Bakio',
-      event_date:null,start_time:null,distance:'1.640 m categoría adultos',place:'Bakio',finish:'Bakio',
-      optional:true,date_state:'pending',status_text:'Opcional',date_text:'Agosto 2027 · día pendiente de publicación',
-      notes:'En 2026 se celebró el 28 de agosto y la organización avisó de un cambio de fecha respecto a otros años. Agosto se usa solo como referencia; no se proyecta el día 28 a 2027.',
-      source_url:'https://www.durangaldeagaur.eus/es/2026/08/13/se-ha-abierto-el-plazo-de-inscripcion-para-la-xvi-milla-popular-de-bakio/',sort_date:'2027-08-28',sort_is_approx:true
-    },
-    {
-      id:'candidate-hiru-gurutzeak-2027',title:'Hiru Gurutzeak · Marcha de las 3 Cruces',
-      event_date:null,start_time:null,distance:'80–85 km aprox.',place:'Galdakao',finish:'Galdakao',
-      optional:true,date_state:'pending',status_text:'Opcional',date_text:'Septiembre 2027 · edición bianual · día pendiente',
-      notes:'Se celebra cada 2 años. Las ediciones 2023 y 2025 fueron a finales de septiembre; se coloca en septiembre de 2027 como referencia, sin asignar un día hasta que lo publique la organización.',
-      source_url:'https://www.gangurenmt.net/index.php?Itemid=36&id=85&lang=eu&option=com_content&view=article',sort_date:'2027-09-30',sort_is_approx:true,periodicity:'Bianual'
-    },
-    {
-      id:'candidate-mugarriz-mugarri-2028',title:'Mugarriz Mugarri',
-      event_date:null,start_time:null,distance:'50 km aprox. / recorrido corto ~20–24 km',place:'Galdakao',finish:'Galdakao',
-      optional:true,date_state:'pending',status_text:'Opcional',date_text:'2028 · edición bianual · fecha pendiente',
-      notes:'Se celebra cada 2 años. La XI edición fue el 23 de mayo de 2026, por lo que no corresponde una edición en 2027. La siguiente se sitúa en 2028 sin inventar día ni mes definitivo.',
-      source_url:'https://www.gangurenmt.net/index.php?Itemid=61&id=86&lang=es-ES&option=com_content&view=article',sort_date:'2028-05-31',sort_is_approx:true,periodicity:'Bianual'
-    }
+    {id:'candidate-ponle-freno-bilbao-2026',title:'Ponle Freno Bilbao 10K',event_date:'2026-09-20',start_time:'10:30',distance:'10 km',place:'Bilbao',finish:'Bilbao',optional:true,date_state:'confirmed',status_text:'Opcional',date_text:'20 septiembre 2026 · 10:30 · fecha confirmada',notes:'Edición de Bilbao 2026 confirmada. Participación de Igor todavía no confirmada.',source_url:'https://www.atresmedia.com/ponle-freno/carreras/2026/bilbao/reglamento-carrera-ponle-freno-bilbao-2026_202608266a8c17027b9bc81c9ed6e392.html',sort_date:'2026-09-20'},
+    {id:'candidate-media-getxo-2027',title:'Media Maratón de Getxo',event_date:'2027-04-04',start_time:'09:00',distance:'21,097 km',place:'Getxo',finish:'Getxo',optional:true,date_state:'confirmed',status_text:'Opcional',date_text:'4 abril 2027 · 09:00 · fecha confirmada',notes:'IV edición. La fecha de 2027 ya está publicada; participación de Igor todavía no confirmada.',source_url:'https://www.bizkaia.eus/es/kirolbidepro/evento-detalle/-/asset_publisher/hAfe1q5ipej5/content/inscripcion-media-maraton-de-getxo-2027/880303',sort_date:'2027-04-04'},
+    {id:'candidate-zazpi-trokak-2027',title:'Zazpi Trokak Galdakao',event_date:null,start_time:null,distance:'22–23 km / modalidad corta ~16 km',place:'Galdakao',finish:'Galdakao',optional:true,date_state:'pending',status_text:'Opcional',date_text:'Abril 2027 · día pendiente de publicación',notes:'Las ediciones recientes se han celebrado en abril (2025 y 2026). Se usa abril solo para situarla mentalmente; no hay día de 2027 confirmado.',source_url:'https://www.gangurenmt.net/',sort_date:'2027-04-15',sort_is_approx:true},
+    {id:'candidate-vitoria-2027',title:'Vitoria-Gasteiz Maratón Martín Fiz',event_date:'2027-05-16',start_time:'08:30',distance:'42,195 km',place:'Mendizorroza, Vitoria-Gasteiz',finish:'Vitoria-Gasteiz',optional:true,date_state:'confirmed',status_text:'Opcional',date_text:'16 mayo 2027 · 08:30 · fecha confirmada',notes:'La organización ya publica la edición 2027. Participación de Igor todavía no confirmada.',source_url:'https://www.maratonmartinfiz.com/',sort_date:'2027-05-16'},
+    {id:'candidate-empresas-bilbao-2027',title:'Carrera de Empresas Bilbao',event_date:null,start_time:null,distance:'6 km aprox.',place:'Bilbao',finish:'Bilbao',optional:true,date_state:'pending',status_text:'Opcional',date_text:'Junio 2027 · día pendiente de publicación',notes:'La edición 2026 se celebró el 7 de junio. Junio se usa únicamente como referencia de colocación hasta que se publique la edición 2027.',source_url:'https://www.carrera-empresas.com/',sort_date:'2027-06-15',sort_is_approx:true},
+    {id:'candidate-hiri-krosa-2027',title:'Hiri Krosa Aste Nagusia',event_date:null,start_time:null,distance:'6 km aprox.',place:'Bilbao',finish:'Bilbao',optional:true,date_state:'pending',status_text:'Opcional',date_text:'Agosto 2027 · Aste Nagusia · día pendiente',notes:'Es una prueba de Aste Nagusia. Se coloca en agosto para visualizarla en la temporada, pero el día de 2027 todavía no está publicado.',source_url:'https://www.bilbokokonpartsak.eus/aste-nagusia/hiri-krosa?lang=es',sort_date:'2027-08-25',sort_is_approx:true},
+    {id:'candidate-milla-bakio-2027',title:'Milla Popular de Bakio',event_date:null,start_time:null,distance:'1.640 m categoría adultos',place:'Bakio',finish:'Bakio',optional:true,date_state:'pending',status_text:'Opcional',date_text:'Agosto 2027 · día pendiente de publicación',notes:'En 2026 se celebró el 28 de agosto y la organización avisó de un cambio de fecha respecto a otros años. Agosto se usa solo como referencia; no se proyecta el día 28 a 2027.',source_url:'https://www.durangaldeagaur.eus/es/2026/08/13/se-ha-abierto-el-plazo-de-inscripcion-para-la-xvi-milla-popular-de-bakio/',sort_date:'2027-08-28',sort_is_approx:true},
+    {id:'candidate-hiru-gurutzeak-2027',title:'Hiru Gurutzeak · Marcha de las 3 Cruces',event_date:null,start_time:null,distance:'80–85 km aprox.',place:'Galdakao',finish:'Galdakao',optional:true,date_state:'pending',status_text:'Opcional',date_text:'Septiembre 2027 · edición bianual · día pendiente',notes:'Se celebra cada 2 años. Las ediciones 2023 y 2025 fueron a finales de septiembre; se coloca en septiembre de 2027 como referencia, sin asignar un día hasta que lo publique la organización.',source_url:'https://www.gangurenmt.net/index.php?Itemid=36&id=85&lang=eu&option=com_content&view=article',sort_date:'2027-09-30',sort_is_approx:true,periodicity:'Bianual'},
+    {id:'candidate-mugarriz-mugarri-2028',title:'Mugarriz Mugarri',event_date:null,start_time:null,distance:'50 km aprox. / recorrido corto ~20–24 km',place:'Galdakao',finish:'Galdakao',optional:true,date_state:'pending',status_text:'Opcional',date_text:'2028 · edición bianual · fecha pendiente',notes:'Se celebra cada 2 años. La XI edición fue el 23 de mayo de 2026, por lo que no corresponde una edición en 2027. La siguiente se sitúa en 2028 sin inventar día ni mes definitivo.',source_url:'https://www.gangurenmt.net/index.php?Itemid=61&id=86&lang=es-ES&option=com_content&view=article',sort_date:'2028-05-31',sort_is_approx:true,periodicity:'Bianual'}
   ];
+  window.familyOptionalRaces=OPTIONAL_RACES.map(x=>({...x}));
 
   function todayIso(){return iso(new Date())}
   function eventIsPast(x){
@@ -84,7 +31,6 @@
     const body=$('cbody');
     if(!body)return;
     const pastEventRows=[],pastSchoolRows=[];
-
     const eventSection=[...body.querySelectorAll('.calendarSection')].find(s=>s.querySelector('.calendarSectionTitle')?.textContent.trim()==='EVENTOS Y PARTIDOS');
     if(eventSection){
       [...eventSection.querySelectorAll('.item[data-detail-event]')].forEach(row=>{
@@ -93,18 +39,13 @@
       });
       if(!eventSection.querySelector('.item'))eventSection.remove();
     }
-
     const schoolSection=[...body.querySelectorAll('.calendarSection')].find(s=>s.querySelector('.calendarSectionTitle')?.textContent.trim()==='IKASTOLA');
     if(schoolSection){
       const schoolRows=[...schoolSection.querySelectorAll('.item')];
       const schoolData=[...(D.school_calendar||[])].sort((a,b)=>a.start_date.localeCompare(b.start_date));
-      schoolRows.forEach((row,i)=>{
-        const x=schoolData[i];
-        if(x&&x.end_date<todayIso()){pastSchoolRows.push(row);row.remove()}
-      });
+      schoolRows.forEach((row,i)=>{const x=schoolData[i];if(x&&x.end_date<todayIso()){pastSchoolRows.push(row);row.remove()}});
       if(!schoolSection.querySelector('.item'))schoolSection.remove();
     }
-
     if(!pastEventRows.length&&!pastSchoolRows.length)return;
     const details=document.createElement('details');details.className='pastDrawer calendarPastDrawer';
     const summary=document.createElement('summary');summary.innerHTML=`Ver acontecimientos pasados <span>${pastEventRows.length+pastSchoolRows.length}</span>`;details.append(summary);
@@ -115,17 +56,12 @@
   };
 
   const raceStyle=document.createElement('style');
-  raceStyle.textContent=`.raceCard.raceOptional{border:2px solid #f59e0b;background:#fffbeb}.raceOptional .raceHead{align-items:center}.optionalFlag{display:inline-flex;align-items:center;gap:4px;background:#f59e0b;color:#fff;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:950;letter-spacing:.04em}.datePendingFlag{display:inline-block;font-size:9px;font-weight:900;color:#92400e;background:#fef3c7;border-radius:999px;padding:4px 7px}.dateConfirmedFlag{display:inline-block;font-size:9px;font-weight:900;color:#166534;background:#dcfce7;border-radius:999px;padding:4px 7px}.raceChronologyHint{margin:0 0 10px;padding:9px 11px;border:1px solid #fde68a;background:#fffbeb;border-radius:11px;font-size:11px;color:#78350f}`;
+  raceStyle.textContent=`.raceCard.raceOptional{border:2px solid #f59e0b;background:#fffbeb}.raceOptional .raceHead{align-items:center}.optionalFlag{display:inline-flex;align-items:center;gap:4px;background:#f59e0b;color:#fff;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:950;letter-spacing:.04em}.datePendingFlag{display:inline-block;font-size:9px;font-weight:900;color:#92400e;background:#fef3c7;border-radius:999px;padding:4px 7px}.dateConfirmedFlag{display:inline-block;font-size:9px;font-weight:900;color:#166534;background:#dcfce7;border-radius:999px;padding:4px 7px}.raceChronologyHint{margin:0 0 10px;padding:9px 11px;border:1px solid #fde68a;background:#fffbeb;border-radius:11px;font-size:11px;color:#78350f}.homeOptionalRace{background:#fffbeb!important;border-color:#f59e0b!important}.homeOptionalRace .homeOptionalTag{display:inline-block;background:#f59e0b;color:#fff;border-radius:999px;padding:2px 6px;font-size:8px;font-weight:950;margin-left:4px}.homeOptionalRace .date.approx span{background:#fef3c7;color:#92400e}.homeOptionalRace .date.approx b{font-size:16px;color:#92400e}`;
   document.head.appendChild(raceStyle);
 
-  function baseRaceDate(x){
-    const d=fmt(new Date(x.event_date+'T12:00:00'),{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-    return x.start_time?d+' · '+x.start_time.slice(0,5):d+' · horario por confirmar';
-  }
+  function baseRaceDate(x){const d=fmt(new Date(x.event_date+'T12:00:00'),{weekday:'long',day:'numeric',month:'long',year:'numeric'});return x.start_time?d+' · '+x.start_time.slice(0,5):d+' · horario por confirmar'}
   function sourceButton(x){return x.source_url?`<a class="miniBtn raceSource" href="${esc(x.source_url)}" target="_blank" rel="noopener">Web / fuente</a>`:'<span class="miniBtn" style="opacity:.55;text-align:center">Web pendiente</span>'}
-  function standardRaceCard(x){
-    return `<article class="raceCard"><div class="raceHead"><div class="name">🏃 ${esc(x.title)}</div><span class="raceStatus ${x.status}">${esc(x.status_text)}</span></div><div class="raceDate">${esc(baseRaceDate(x))}</div><div class="raceFacts"><div class="raceFact"><span>🏁</span><div><b>${esc(x.distance)}</b></div></div><div class="raceFact"><span>📍</span><div><b>Salida</b><br>${mapLink(x.place)}</div></div><div class="raceFact"><span>🏆</span><div><b>Meta</b><br>${esc(x.finish)}</div></div></div><div class="raceNote">${esc(x.notes)}</div><div class="raceActions"><a class="miniBtn" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(x.place)}" target="_blank" rel="noopener">Cómo llegar</a>${sourceButton(x)}<button type="button" class="miniBtn" data-race-google="${x.id}">Google Calendar</button><button type="button" class="miniBtn" data-race-apple="${x.id}">Apple Calendar</button></div></article>`;
-  }
+  function standardRaceCard(x){return `<article class="raceCard"><div class="raceHead"><div class="name">🏃 ${esc(x.title)}</div><span class="raceStatus ${x.status}">${esc(x.status_text)}</span></div><div class="raceDate">${esc(baseRaceDate(x))}</div><div class="raceFacts"><div class="raceFact"><span>🏁</span><div><b>${esc(x.distance)}</b></div></div><div class="raceFact"><span>📍</span><div><b>Salida</b><br>${mapLink(x.place)}</div></div><div class="raceFact"><span>🏆</span><div><b>Meta</b><br>${esc(x.finish)}</div></div></div><div class="raceNote">${esc(x.notes)}</div><div class="raceActions"><a class="miniBtn" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(x.place)}" target="_blank" rel="noopener">Cómo llegar</a>${sourceButton(x)}<button type="button" class="miniBtn" data-race-google="${x.id}">Google Calendar</button><button type="button" class="miniBtn" data-race-apple="${x.id}">Apple Calendar</button></div></article>`}
   function candidateCard(x){
     const dateBadge=x.date_state==='confirmed'?'<span class="dateConfirmedFlag">FECHA CONFIRMADA</span>':'<span class="datePendingFlag">FECHA PENDIENTE</span>';
     const cal=x.event_date?`<button type="button" class="miniBtn" data-candidate-google="${x.id}">Google Calendar</button><button type="button" class="miniBtn" data-candidate-apple="${x.id}">Apple Calendar</button>`:'<span class="miniBtn" style="opacity:.55;text-align:center">Calendario cuando haya fecha</span>';
@@ -148,6 +84,22 @@
     $('raceList').innerHTML=html;bindRaceButtonsV4();
   };
 
+  function approxDateBox(ds){const d=new Date(ds+'T12:00:00'),mo=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][d.getMonth()];return `<div class="date approx"><span>APROX.</span><b>~</b><small>${mo}</small></div>`}
+  function optionalHomeCard(x){
+    const dateBox=x.event_date?db(x.event_date):approxDateBox(x.sort_date);
+    return `<div class="ev homeOptionalRace">${dateBox}<div><strong>🏃 ${esc(x.title)} <span class="homeOptionalTag">☆ OPCIONAL</span></strong><em>${esc(x.date_text)}${x.place?' · '+mapLink(x.place):''}</em><div class="itemactions"><button type="button" class="miniBtn" data-home-open-races>Ver en Carreras</button></div></div></div>`;
+  }
+  rh=function(){
+    const n=iso(new Date()),limit=new Date();limit.setDate(limit.getDate()+60);const end=iso(limit);
+    const standard=[...D.events.filter(x=>x.event_date>=n&&x.event_date<=end),...raceEvents().filter(x=>x.event_date>=n&&x.event_date<=end),...(D.school_calendar||[]).filter(x=>x.end_date>=n&&x.start_date<=end).map(x=>({...x,event_date:x.start_date<n?n:x.start_date,_school:true}))].map(x=>({...x,_home_date:x.event_date}));
+    const optional=OPTIONAL_RACES.filter(x=>{const d=x.event_date||x.sort_date;return d>=n&&d<=end}).map(x=>({...x,_optional_home:true,_home_date:x.event_date||x.sort_date}));
+    const a=[...standard,...optional].sort((x,y)=>x._home_date.localeCompare(y._home_date)||(x.start_time||'99').localeCompare(y.start_time||'99')),g={};
+    a.forEach(x=>{const k=iso(mon(new Date(x._home_date+'T12:00:00')));(g[k]??=[]).push(x)});
+    $('coming').innerHTML=Object.entries(g).map(([k,x])=>{const d=new Date(k+'T12:00:00'),z=new Date(d);z.setDate(z.getDate()+6);return `<div class="group"><div class="ghead">SEMANA · ${fmt(d)} – ${fmt(z)}</div><div class="cards">${x.map(v=>v._optional_home?optionalHomeCard(v):homeCard(v)).join('')}</div></div>`}).join('')||'<div class="card pad">Nada excepcional próximo.</div>';
+    document.querySelectorAll('[data-home-open-races]').forEach(b=>b.onclick=()=>{if(typeof window.familySafeOpen==='function')window.familySafeOpen('races');else show('races')});
+  };
+
   renderRaces();
   rc();
+  if(typeof CODE!=='undefined'&&CODE)rh();
 })();
