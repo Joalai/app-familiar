@@ -10,6 +10,8 @@ on:
       - 'navigation-fix.js'
       - 'home-dashboard.js'
       - 'home-upcoming-races.js'
+      - 'packing-smart.js'
+      - 'smart-features.js'
       - '.github/workflows/integrate-enhancements.yml'
 
 permissions:
@@ -28,11 +30,11 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           import re
-          VERSION='2026.09.09.7'
+          VERSION='2026.09.09.8'
           p=Path('index.html')
           s=p.read_text()
           s=re.sub(r"const APP_VERSION='[^']+';", f"const APP_VERSION='{VERSION}';", s)
-          for script in ['app-enhancements.js','calendar-races-update.js','packing.js','navigation-fix.js','home-dashboard.js','home-upcoming-races.js']:
+          for script in ['app-enhancements.js','calendar-races-update.js','packing.js','navigation-fix.js','home-dashboard.js','home-upcoming-races.js','packing-smart.js','smart-features.js']:
               pat=rf'<script src="{re.escape(script)}\?v=[^"]+"></script>'
               tag=f'<script src="{script}?v={VERSION}"></script>'
               s=re.sub(pat,tag,s)
@@ -48,7 +50,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html version.json
-          git commit -m "Publish packing load fix"
+          git commit -m "Publish smart family features"
           for i in 1 2 3 4; do
             git fetch origin main
             git rebase origin/main || { git rebase --abort; exit 1; }
