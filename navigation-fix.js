@@ -18,6 +18,7 @@
       else if(v==='routines'&&typeof rroutines==='function')rroutines();
       else if(v==='sports'&&typeof rs==='function')rs();
       else if(v==='cal'&&typeof rc==='function')rc();
+      else if(v==='packing'&&typeof window.familyPackingLoad==='function')window.familyPackingLoad();
     }catch(err){
       console.error('Error al renderizar '+v,err);
     }
@@ -38,11 +39,8 @@
     return true;
   }
 
-  // Sustituye la navegación original por una versión que primero cambia de pantalla
-  // y después intenta renderizarla. Así un error interno no bloquea el cambio de sección.
   try{window.show=safeOpen}catch(e){}
 
-  // Refuerzo para cualquier botón del menú que no tenga onclick propio.
   document.addEventListener('click',e=>{
     const b=e.target.closest?.('#nav button[data-v]');
     if(!b||typeof b.onclick==='function')return;
