@@ -1,90 +1,142 @@
 (()=>{
 'use strict';
 
-const NF_SEEN='family_notice_seen_keys';
-let nfPacking={trips:[],trip_items:[]},nfPackingAt=0,nfSyncing=false;
-const nfToday=()=>typeof iso==='function'?iso(new Date()):new Date().toISOString().slice(0,10);
-function nfAddDays(ds,n){const d=new Date(ds+'T12:00:00');d.setDate(d.getDate()+n);return typeof iso==='function'?iso(d):d.toISOString().slice(0,10)}
-function nfFmt(ds){try{return fmt(new Date(ds+'T12:00:00'),{weekday:'short',day:'numeric',month:'short'})}catch(e){return ds}}
-function nfSeen(){try{return new Set(JSON.parse(localStorage.getItem(NF_SEEN)||'[]'))}catch(e){return new Set()}}
-function nfSaveSeen(set){try{localStorage.setItem(NF_SEEN,JSON.stringify([...set].slice(-300)))}catch(e){}}
-function nfGo(view){if(typeof window.familySafeOpen==='function')window.familySafeOpen(view);else if(typeof show==='function')show(view)}
-function nfPlain(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+const NF_SEEN='family_section_seen_v2',NF_INIT='family_section_seen_v2_initialized';
+const NF_SECTIONS=['shop','packing','health','plans','routines','sports','races','cal','documents'];
+let nfPacking={master_items:[],trips:[],trip_items:[]},nfPackingAt=0,nfBusy=false,nfRendering=false;
+const nfEsc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
+function nfDataReady(){
+ const sync=(document.getElementById('sync')?.textContent||'').toLocaleLowerCase('es');
+ return sync.includes('sincron')||((D?.members||[]).length>0);
+}
+function nfSeen(){
+ try{const x=JSON.parse(localStorage.getItem(NF_SEEN)||'{}');return x&&typeof x==='object'?x:{}}catch(e){return {}}
+}
+function nfSaveSeen(x){
+ const clean={};NF_SECTIONS.forEach(s=>clean[s]=[...new Set(x[s]||[])].slice(-1200));
+ try{localStorage.setItem(NF_SEEN,JSON.stringify(clean))}catch(e){}
+}
+function nfTitle(x,fallback='Elemento'){try{return typeof displayTitle==='function'?displayTitle(x):(x.title||x.item_name||fallback)}catch(e){return x.title||x.item_name||fallback}}
+function nfSectionForEvent(x){
+ try{if(typeof isRace==='function'&&isRace(x))return 'races'}catch(e){}
+ try{if(typeof isHealth==='function'&&isHealth(x))return 'health'}catch(e){}
+ if(x.category==='sport')return 'sports';
+ return 'plans';
+}
 async function nfFetchPacking(force=false){
  if(!CODE)return nfPacking;
- if(!force&&Date.now()-nfPackingAt<30000)return nfPacking;
+ if(!force&&Date.now()-nfPackingAt<25000)return nfPacking;
  try{nfPacking=await rpc('family_packing_get',{p_code:CODE})||nfPacking;nfPackingAt=Date.now()}catch(e){}
  return nfPacking;
 }
-function nfRaceWeekendIds(r){
- if(!r.event_date)return [];
- const d=new Date(r.event_date+'T12:00:00'),day=d.getDay(),sat=new Date(d);sat.setDate(sat.getDate()+(day===0?-1:6-day));const satIso=typeof iso==='function'?iso(sat):sat.toISOString().slice(0,10),sunIso=nfAddDays(satIso,1);
- return (D?.events||[]).filter(x=>x.event_date===satIso||x.event_date===sunIso).map(x=>x.id).sort();
+function nfRecords(){
+ const out=[],push=(section,key,title,sub='')=>{if(section&&key)out.push({section,key:String(key),title:String(title||'Novedad'),sub:String(sub||'')})};
+ const events=D?.events||[];
+ events.forEach(x=>{const s=nfSectionForEvent(x);push(s,`event:${x.id}`,nfTitle(x),`${x.event_date||''}${x.member_names?.length?' · '+x.member_names.join(', '):''}`)});
+ (D?.recurring||[]).forEach(x=>push('routines',`routine:${x.id}`,nfTitle(x),(x.member_names||[]).join(', ')));
+ (D?.shopping||[]).filter(x=>!x.is_done).forEach(x=>push('shop',`shop:${x.id}`,x.item_name||'Compra pendiente',x.category||''));
+ (D?.school_calendar||[]).forEach(x=>push('cal',`school:${x.id||[x.start_date,x.end_date,x.title].join(':')}`,x.title||'Calendario escolar',`${x.start_date||''}${x.end_date?' – '+x.end_date:''}`));
+ const eventIds=new Set(events.map(x=>String(x.id)));
+ try{if(typeof raceEvents==='function')raceEvents().filter(x=>!eventIds.has(String(x.id))).forEach(x=>push('races',`race:${x.id}`,x.title||'Carrera',x.event_date||''))}catch(e){}
+ (window.familyOptionalRaces||[]).forEach(x=>push('races',`optional:${x.id}`,x.title||'Carrera opcional',x.date_text||x.event_date||''));
+ (nfPacking.master_items||[]).filter(x=>x.active!==false).forEach(x=>push('packing',`pack-master:${x.id}`,x.item_name||'Objeto de maleta',x.person_name||''));
+ (nfPacking.trips||[]).forEach(x=>push('packing',`pack-trip:${x.id}`,x.title||'Viaje',x.start_date||''));
+ (nfPacking.trip_items||[]).filter(x=>!x.master_item_id).forEach(x=>push('packing',`pack-manual:${x.id}`,x.item_name||'Objeto de viaje',x.person_name||''));
+ const seenKeys=new Set(),dedup=[];out.forEach(x=>{const k=x.section+'|'+x.key;if(!seenKeys.has(k)){seenKeys.add(k);dedup.push(x)}});return dedup;
 }
-function nfItems(){
- const n=nfToday(),d14=nfAddDays(n,14),d60=nfAddDays(n,60),out=[];
- (D?.events||[]).filter(x=>typeof isHealth==='function'&&isHealth(x)&&x.event_date>=n&&x.event_date<=d14).forEach(x=>out.push({key:`health:${x.id}:${x.event_date}`,kind:'warn',title:'🩺 '+displayTitle(x),sub:`${nfFmt(x.event_date)} · cita próxima`,view:'health'}));
- (window.familyOptionalRaces||[]).filter(x=>x.event_date&&x.event_date>=n&&x.event_date<=d60).forEach(x=>{const weekend=nfRaceWeekendIds(x),busy=weekend.length>0;out.push({key:`race:${x.id}:${x.event_date}:${weekend.join(',')}`,kind:busy?'warn':'ok',title:'🏃 '+x.title,sub:busy?`Revisar ${weekend.length} coincidencia${weekend.length===1?'':'s'} de ese fin de semana`:'Fin de semana libre en la agenda',view:'races'})});
- const oldCut=new Date();oldCut.setDate(oldCut.getDate()-7);(D?.shopping||[]).filter(x=>!x.is_done&&x.created_at&&new Date(x.created_at)<oldCut).slice(0,5).forEach(x=>out.push({key:`shop:${x.id}`,kind:'warn',title:'🛒 '+x.item_name,sub:'Pendiente desde hace más de 7 días',view:'shop'}));
- const byTrip={};(nfPacking.trip_items||[]).filter(x=>x.status==='pending').forEach(x=>byTrip[x.trip_id]=(byTrip[x.trip_id]||0)+1);
- Object.entries(byTrip).forEach(([tripId,count])=>{const tr=(nfPacking.trips||[]).find(x=>x.id===tripId);out.push({key:`packing:${tripId}:${count}`,kind:'warn',title:'🧳 '+(tr?.title||'Maleta'),sub:`${count} objeto${count===1?'':'s'} pendiente${count===1?'':'s'}`,view:'packing'})});
- return out;
+function nfInitializeIfNeeded(){
+ if(localStorage.getItem(NF_INIT)==='1'||!nfDataReady())return false;
+ const s={};NF_SECTIONS.forEach(k=>s[k]=[]);nfRecords().forEach(x=>s[x.section].push(x.key));nfSaveSeen(s);
+ localStorage.setItem(NF_INIT,'1');
+ localStorage.setItem('family_unread_events','0');
+ return true;
 }
-function nfUnread(){return Number(localStorage.getItem('family_unread_events')||0)||0}
-function nfUnseenItems(){const seen=nfSeen();return nfItems().filter(x=>!seen.has(x.key))}
-function nfCount(){return nfUnseenItems().length+nfUnread()}
+function nfUnseen(){
+ const seen=nfSeen();return nfRecords().filter(x=>!(seen[x.section]||[]).includes(x.key));
+}
+function nfCounts(){
+ const c={};NF_SECTIONS.forEach(s=>c[s]=0);nfUnseen().forEach(x=>c[x.section]=(c[x.section]||0)+1);return c;
+}
+function nfTotal(){return nfUnseen().length}
+function nfMarkSection(section){
+ if(!NF_SECTIONS.includes(section))return;
+ const seen=nfSeen();seen[section]=seen[section]||[];const set=new Set(seen[section]);nfRecords().filter(x=>x.section===section).forEach(x=>set.add(x.key));seen[section]=[...set];nfSaveSeen(seen);localStorage.setItem('family_unread_events','0');nfRender();
+}
+function nfMarkRecord(section,key){
+ if(!section||!key)return;const seen=nfSeen();seen[section]=seen[section]||[];if(!seen[section].includes(key))seen[section].push(key);nfSaveSeen(seen);localStorage.setItem('family_unread_events','0');nfRender();
+}
+function nfMarkAll(){
+ const seen=nfSeen();NF_SECTIONS.forEach(s=>seen[s]=seen[s]||[]);nfRecords().forEach(x=>{if(!seen[x.section].includes(x.key))seen[x.section].push(x.key)});nfSaveSeen(seen);localStorage.setItem('family_unread_events','0');nfRender();
+}
 
 const nativeSetBadge=typeof navigator.setAppBadge==='function'?navigator.setAppBadge.bind(navigator):null;
 const nativeClearBadge=typeof navigator.clearAppBadge==='function'?navigator.clearAppBadge.bind(navigator):null;
-async function nfApplyNativeBadge(n){try{if(n>0&&nativeSetBadge)await nativeSetBadge(n);else if(nativeClearBadge)await nativeClearBadge()}catch(e){}}
-function nfSyncBadge(){
- if(nfSyncing)return;nfSyncing=true;
+async function nfNativeBadge(n){try{if(n>0&&nativeSetBadge)await nativeSetBadge(n);else if(nativeClearBadge)await nativeClearBadge()}catch(e){}}
+function nfRenderBell(total){
+ const badge=document.getElementById('notifyBadge'),btn=document.getElementById('notifyBtn');
+ if(badge){badge.textContent=total?String(Math.min(total,99))+(total>99?'+':''):'';badge.classList.toggle('show',total>0)}
+ btn?.classList.toggle('smartAttention',total>0);nfNativeBadge(total);
+}
+function nfRenderCards(counts){
+ const dash=document.getElementById('homeDashboard');if(!dash)return;
+ nfRendering=true;
  try{
-  const n=nfCount(),badge=document.getElementById('notifyBadge'),btn=document.getElementById('notifyBtn');
-  if(badge){const txt=n>99?'99+':String(n);if(badge.textContent!==txt)badge.textContent=txt;badge.classList.toggle('show',n>0)}
-  btn?.classList.toggle('smartAttention',n>0);
-  nfApplyNativeBadge(n);
- }finally{setTimeout(()=>nfSyncing=false,0)}
+  dash.querySelectorAll('.homeCardBadge').forEach(x=>x.remove());
+  dash.querySelectorAll('.homeGroup > .homeMenuGrid .homeMenuCard[data-home-open]').forEach(card=>{
+   const n=counts[card.dataset.homeOpen]||0;if(!n)return;
+   const b=document.createElement('span');b.className='homeCardBadge nfNewBadge';b.textContent=n>99?'99+':String(n);b.setAttribute('aria-label',`${n} novedades sin ver`);card.appendChild(b);
+  });
+ }finally{setTimeout(()=>nfRendering=false,0)}
 }
-function nfAcknowledge(){
- const seen=nfSeen();nfItems().forEach(x=>seen.add(x.key));nfSaveSeen(seen);
+function nfRender(){
+ if(localStorage.getItem(NF_INIT)!=='1')return;
  localStorage.setItem('family_unread_events','0');
- nfSyncBadge();
+ const c=nfCounts(),total=Object.values(c).reduce((a,b)=>a+b,0);nfRenderCards(c);nfRenderBell(total);
 }
-function nfPruneSeen(){const active=new Set(nfItems().map(x=>x.key)),seen=nfSeen(),keep=new Set([...seen].filter(k=>active.has(k)));nfSaveSeen(keep)}
+
+const css=document.createElement('style');
+css.textContent=`.homeCardBadge.nfNewBadge{right:9px!important;top:9px!important;min-width:30px!important;height:30px!important;padding:0 8px!important;border-radius:999px!important;font-size:13px!important;font-weight:950!important;line-height:30px!important;display:grid!important;place-items:center!important}.homeFavGroup .homeCardBadge{display:none!important}.notifybadge:not(.show){display:none!important}`;
+document.head.appendChild(css);
 
 function nfEnsureDialog(){
- let d=document.getElementById('smartNotifyDialog');
- if(!d){d=document.createElement('dialog');d.id='smartNotifyDialog';d.className='smartDialog';d.innerHTML='<div class="smartDialogHead"><b>Centro de avisos</b><button type="button" class="smartClose">×</button></div><div class="smartDialogBody"></div>';document.body.appendChild(d)}
- d.querySelector('.smartClose').onclick=()=>d.close();return d;
+ let d=document.getElementById('smartNotifyDialog');if(!d){d=document.createElement('dialog');d.id='smartNotifyDialog';d.className='smartDialog';d.innerHTML='<div class="smartDialogHead"><b>Novedades</b><button type="button" class="smartClose">×</button></div><div class="smartDialogBody"></div>';document.body.appendChild(d)}d.querySelector('.smartClose').onclick=()=>d.close();return d;
 }
 function nfOpenCenter(){
- const items=nfItems(),enabled=typeof notificationEnabled==='function'?notificationEnabled():false;
- nfAcknowledge();
+ const fresh=nfUnseen();nfMarkAll();
  const d=nfEnsureDialog(),body=d.querySelector('.smartDialogBody');
- body.innerHTML=`${!enabled?'<div class="smartAlert warn"><b>🔔 Avisos del iPhone desactivados</b><small>Puedes activarlos desde aquí si la app está instalada en la pantalla de inicio.</small></div>':''}${items.length?items.map((x,i)=>`<button type="button" class="smartAlert ${x.kind}" style="width:100%;text-align:left" data-nf-alert="${i}"><b>${nfPlain(x.title)}</b><small>${nfPlain(x.sub)}</small></button>`).join(''):'<div class="smartAlert ok"><b>✓ Nada requiere atención ahora</b><small>La agenda no tiene avisos destacados.</small></div>'}<div class="smartActionRow">${!enabled?'<button type="button" class="primary" id="nfEnableNotify">Activar notificaciones</button>':''}<button type="button" class="secondary" id="nfCloseNotify">Cerrar</button></div><div class="smartBadgeNote">El número de la campana y del icono de la app cuenta solo avisos nuevos desde la última vez que abriste este centro. Los avisos activos siguen visibles aquí aunque ya estén leídos.</div>`;
- body.querySelectorAll('[data-nf-alert]').forEach(b=>b.onclick=()=>{const x=items[Number(b.dataset.nfAlert)];d.close();nfGo(x.view)});
- body.querySelector('#nfCloseNotify').onclick=()=>{nfAcknowledge();d.close()};
- const en=body.querySelector('#nfEnableNotify');if(en)en.onclick=async()=>{if(typeof enableNotifications==='function')await enableNotifications();nfAcknowledge();d.close()};
- if(!d.open)d.showModal();nfSyncBadge();
+ body.innerHTML=fresh.length?`<div class="smartAlert ok"><b>✓ ${fresh.length} novedad${fresh.length===1?'':'es'} marcada${fresh.length===1?'':'s'} como vista${fresh.length===1?'':'s'}</b><small>Al abrir la campana se limpian también los globos de las secciones y el del icono de la app.</small></div>${fresh.map((x,i)=>`<button type="button" class="smartAlert" style="width:100%;text-align:left" data-nf-fresh="${i}"><b>${nfEsc(x.title)}</b><small>${nfEsc(x.sub)} · ${nfEsc(({shop:'Compras',packing:'Maleta',health:'Salud',plans:'Cumples y planes',routines:'Rutinas',sports:'Deporte',races:'Carreras',cal:'Calendarios',documents:'Documentación'})[x.section]||x.section)}</small></button>`).join('')}`:'<div class="smartAlert ok"><b>✓ No tienes novedades sin ver</b><small>Los avisos ya revisados no generan ningún globo.</small></div>';
+ body.querySelectorAll('[data-nf-fresh]').forEach(b=>b.onclick=()=>{const x=fresh[Number(b.dataset.nfFresh)];d.close();nfGo(x.section)});
+ if(!d.open)d.showModal();
 }
-function nfHookBell(){const b=document.getElementById('notifyBtn');if(!b)return;b.onclick=nfOpenCenter;b.dataset.noticeFixed='1'}
+function nfGo(view){if(typeof window.familySafeOpen==='function')window.familySafeOpen(view);else if(typeof show==='function')show(view)}
+function nfHookBell(){const b=document.getElementById('notifyBtn');if(b)b.onclick=nfOpenCenter}
 
-// El código anterior recalculaba todos los avisos activos como no leídos. Este observador
-// vuelve a imponer el estado correcto si cualquier render antiguo intenta reescribir el badge.
-function nfObserveBadge(){
- const badge=document.getElementById('notifyBadge'),btn=document.getElementById('notifyBtn');if(!badge||badge.dataset.nfObserved)return;badge.dataset.nfObserved='1';
- const obs=new MutationObserver(()=>{if(!nfSyncing)queueMicrotask(nfSyncBadge)});obs.observe(badge,{childList:true,characterData:true,subtree:true,attributes:true});if(btn)obs.observe(btn,{attributes:true,attributeFilter:['class']});
+function nfWrapNavigation(){
+ if(window.familySafeOpen&&!window.familySafeOpen.__nfWrapped){const old=window.familySafeOpen;const wrapped=function(v){const r=old(v);if(r!==false&&NF_SECTIONS.includes(v))setTimeout(()=>nfMarkSection(v),80);return r};wrapped.__nfWrapped=true;window.familySafeOpen=wrapped}
+ if(window.show&&!window.show.__nfWrapped){const old=window.show;const wrapped=function(v){const r=old(v);if(r!==false&&NF_SECTIONS.includes(v))setTimeout(()=>nfMarkSection(v),80);return r};wrapped.__nfWrapped=true;window.show=wrapped}
+}
+function nfEventRecordById(id){return nfRecords().find(x=>x.key===`event:${id}`)}
+function nfDetailHooks(){
+ document.addEventListener('click',e=>{
+  const ev=e.target.closest?.('[data-detail-event]');if(ev){const r=nfEventRecordById(ev.dataset.detailEvent);if(r)nfMarkRecord(r.section,r.key);return}
+  const rr=e.target.closest?.('[data-detail-routine]');if(rr)nfMarkRecord('routines',`routine:${rr.dataset.detailRoutine}`);
+ },true);
+}
+function nfObserve(){
+ const dash=document.getElementById('homeDashboard'),bell=document.getElementById('notifyBadge');
+ if(dash&&!dash.dataset.nfObserved){dash.dataset.nfObserved='1';new MutationObserver(()=>{if(!nfRendering)queueMicrotask(nfRender)}).observe(dash,{childList:true,subtree:true})}
+ if(bell&&!bell.dataset.nfObserved2){bell.dataset.nfObserved2='1';new MutationObserver(()=>{if(!nfRendering)queueMicrotask(nfRender)}).observe(bell,{childList:true,subtree:true,attributes:true})}
 }
 
-const priorUpdate=typeof updateNotifyButton==='function'?updateNotifyButton:null;
-if(priorUpdate){updateNotifyButton=function(){priorUpdate();setTimeout(nfSyncBadge,0)}}
-
-async function nfRefresh(force=false){await nfFetchPacking(force);nfPruneSeen();nfHookBell();nfObserveBadge();nfSyncBadge()}
+async function nfRefresh(force=false){
+ if(nfBusy)return;nfBusy=true;try{await nfFetchPacking(force);const justInit=nfInitializeIfNeeded();nfHookBell();nfWrapNavigation();nfObserve();if(justInit||localStorage.getItem(NF_INIT)==='1')nfRender()}finally{nfBusy=false}
+}
+const oldUpdate=typeof updateNotifyButton==='function'?updateNotifyButton:null;if(oldUpdate){updateNotifyButton=function(){oldUpdate();setTimeout(nfRender,0)}}
+nfDetailHooks();
 document.addEventListener('family-upcoming-rendered',()=>nfRefresh(false));
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')nfRefresh(true)});
 window.addEventListener('focus',()=>nfRefresh(false));
-setInterval(()=>nfRefresh(false),30000);
-setTimeout(()=>nfRefresh(true),100);
+setInterval(()=>nfRefresh(false),20000);
+setTimeout(()=>nfRefresh(true),250);
 })();
