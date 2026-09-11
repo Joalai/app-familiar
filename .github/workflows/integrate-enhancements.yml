@@ -32,7 +32,7 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           import re
-          VERSION='2026.09.11.1'
+          VERSION='2026.09.11.2'
           p=Path('index.html')
           s=p.read_text()
           s=re.sub(r"const APP_VERSION='[^']+';", f"const APP_VERSION='{VERSION}';", s)
@@ -52,7 +52,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html version.json
-          git commit -m "Publish notification read-state fix"
+          git commit -m "Publish new-only section badges"
           for i in 1 2 3 4; do
             git fetch origin main
             git rebase origin/main || { git rebase --abort; exit 1; }
