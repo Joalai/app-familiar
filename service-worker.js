@@ -1,4 +1,4 @@
-const APP_PATCH_VERSION='2026.09.14.4';
+const APP_PATCH_VERSION='2026.09.14.5';
 
 self.addEventListener('install',()=>self.skipWaiting());
 self.addEventListener('activate',event=>event.waitUntil((async()=>{
@@ -13,7 +13,7 @@ self.addEventListener('fetch',event=>{
   if(request.mode!=='navigate')return;
   event.respondWith((async()=>{
     try{
-      const response=await fetch(request);
+      const response=await fetch(request,{cache:'no-store'});
       if(!response.ok)return response;
       const type=response.headers.get('content-type')||'';
       if(!type.includes('text/html'))return response;
