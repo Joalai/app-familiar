@@ -35,10 +35,17 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           import re
-          VERSION='2026.09.14.4'
+          VERSION='2026.09.14.5'
           p=Path('index.html')
           s=p.read_text()
           s=re.sub(r"const APP_VERSION='[^']+';", f"const APP_VERSION='{VERSION}';", s)
+
+          # Coches debe formar parte de la navegación principal, no depender de JS secundario.
+          s=s.replace("['health','Salud'],['races','Carreras']", "['health','Salud'],['cars','Coches'],['races','Carreras']")
+          if '<section id="cars" class="view">' not in s:
+              cars_section='''<section id="cars" class="view"><div class="ey">ITV · seguro · taller</div><div class="title">🚗 Coches</div><div class="card pad"><div class="meta">Cargando datos de coches…</div></div></section>\n'''
+              s=s.replace('<section id="sports" class="view">', cars_section+'<section id="sports" class="view">')
+
           for script in ['app-enhancements.js','calendar-races-update.js','packing.js','navigation-fix.js','home-dashboard.js','home-upcoming-races.js','packing-smart.js','smart-features.js','weekly-auto.js','notification-fix.js','family-upgrades.js','family-upgrades-fix.js','cars-fallback.js']:
               pat=rf'<script src="{re.escape(script)}\?v=[^"]+"></script>'
               tag=f'<script src="{script}?v={VERSION}"></script>'
