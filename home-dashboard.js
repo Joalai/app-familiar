@@ -11,6 +11,7 @@ const SECTIONS=[
   {id:'shop',icon:'🛒',title:'Compras',desc:'Lista compartida'},
   {id:'packing',icon:'🧳',title:'Maleta',desc:'Listas por persona y viaje'},
   {id:'health',icon:'🩺',title:'Salud',desc:'Citas y revisiones'},
+  {id:'cars',icon:'🚗',title:'Coches',desc:'ITV, seguro y taller'},
   {id:'documents',icon:'🪪',title:'Documentación',desc:'DNI, pasaportes y carnets'}
  ]},
  {group:'Actividades',items:[
