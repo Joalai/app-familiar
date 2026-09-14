@@ -48,4 +48,26 @@
   });
 
   window.familySafeOpen=safeOpen;
+
+  // Respaldo de actualización: las mejoras nuevas se cargan aunque el HTML
+  // antiguo siga en caché en un iPhone. Esperamos a DOMContentLoaded para no
+  // duplicarlas cuando el service worker ya las haya inyectado.
+  function loadFamilyUpgrades(){
+    if(document.getElementById('cars'))return;
+    const existing=[...document.scripts].some(s=>(s.src||'').includes('family-upgrades.js'));
+    if(existing)return;
+    const s=document.createElement('script');
+    s.src='family-upgrades.js?v=2026.09.14.3';
+    s.dataset.familyUpgrades='1';
+    s.onload=()=>{
+      if([...document.scripts].some(x=>(x.src||'').includes('family-upgrades-fix.js')))return;
+      const f=document.createElement('script');
+      f.src='family-upgrades-fix.js?v=2026.09.14.3';
+      f.dataset.familyUpgradesFix='1';
+      document.body.appendChild(f);
+    };
+    document.body.appendChild(s);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(loadFamilyUpgrades,0),{once:true});
+  else setTimeout(loadFamilyUpgrades,0);
 })();
