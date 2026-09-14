@@ -35,16 +35,19 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           import re
-          VERSION='2026.09.14.5'
+          VERSION='2026.09.14.6'
           p=Path('index.html')
           s=p.read_text()
           s=re.sub(r"const APP_VERSION='[^']+';", f"const APP_VERSION='{VERSION}';", s)
 
-          # Coches debe formar parte de la navegación principal, no depender de JS secundario.
+          # Coches forma parte de la navegación y del HTML base.
           s=s.replace("['health','Salud'],['races','Carreras']", "['health','Salud'],['cars','Coches'],['races','Carreras']")
           if '<section id="cars" class="view">' not in s:
               cars_section='''<section id="cars" class="view"><div class="ey">ITV · seguro · taller</div><div class="title">🚗 Coches</div><div class="card pad"><div class="meta">Cargando datos de coches…</div></div></section>\n'''
               s=s.replace('<section id="sports" class="view">', cars_section+'<section id="sports" class="view">')
+
+          # El estado principal D es una variable global lexical, no window.D.
+          s=s.replace("D={events:[],shopping:[],recurring:[],members:[],school_calendar:[]}", "D={events:[],shopping:[],recurring:[],members:[],school_calendar:[],vehicles:[],vehicle_records:[]}")
 
           for script in ['app-enhancements.js','calendar-races-update.js','packing.js','navigation-fix.js','home-dashboard.js','home-upcoming-races.js','packing-smart.js','smart-features.js','weekly-auto.js','notification-fix.js','family-upgrades.js','family-upgrades-fix.js','cars-fallback.js']:
               pat=rf'<script src="{re.escape(script)}\?v=[^"]+"></script>'
@@ -53,6 +56,14 @@ jobs:
               if tag not in s:
                   s=s.replace('</body>',tag+'</body>')
           p.write_text(s)
+
+          c=Path('cars-fallback.js')
+          if c.exists():
+              js=c.read_text()
+              js=js.replace("Array.isArray(window.D?.vehicles)?D.vehicles:[]", "Array.isArray(D?.vehicles)?D.vehicles:[]")
+              js=js.replace("Array.isArray(window.D?.vehicle_records)?D.vehicle_records:[]", "Array.isArray(D?.vehicle_records)?D.vehicle_records:[]")
+              c.write_text(js)
+
           Path('version.json').write_text('{"version":"'+VERSION+'"}\n')
           PY
       - name: Commit integrated page
@@ -61,7 +72,7 @@ jobs:
           if git diff --quiet; then exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html version.json
+          git add index.html version.json cars-fallback.js
           git commit -m "Publish app version ${GITHUB_SHA::7}"
           for i in 1 2 3 4; do
             git fetch origin main
