@@ -65,6 +65,7 @@
     <div class="card pad"><div class="title" style="font-size:18px;color:var(--docs)">Documentos familiares</div><div id="docList"></div><button id="docLock" type="button" class="secondary" style="width:100%;margin-top:10px">Bloquear documentación</button></div>
   </div>
 </section>
+<section id="cars" class="view"><div class="ey">ITV · seguro · taller</div><div class="title">🚗 Coches</div><div class="card pad"><div class="meta">Cargando datos de coches…</div></div></section>
 <section id="sports" class="view"><div class="period"><button data-s="-1">‹</button><strong id="st"></strong><button data-s="1">›</button></div><div class="card pad monthwrap"><div id="sb"></div></div></section>
 <section id="cal" class="view"><div id="ctabs" class="tabs"></div><div class="card pad" id="cbody"></div></section>
 </main></div>
@@ -74,13 +75,13 @@
 <script>
 const SUPA='https://gjplhfinujyhjxpahcak.supabase.co';
 const KEY='sb_publishable_8WLfOB17Uhnyd9jNWFdyDA_ewE7yxVO';
-const APP_VERSION='2026.09.14.4';
+const APP_VERSION='2026.09.14.5';
 const FAMILY_USERS=['Igor','Mirari','Joane','Laia','Alain'];
 function canonicalUser(name){let value=String(name||'').trim().toLocaleLowerCase('es');return FAMILY_USERS.find(x=>x.toLocaleLowerCase('es')===value)||''}
 let CODE=localStorage.getItem('family_code')||'',USER=canonicalUser(localStorage.getItem('family_user')),D={events:[],shopping:[],recurring:[],members:[],school_calendar:[]},W=new Date(),M=new Date(),S=new Date(),C='Todos',MONTH_MODE=localStorage.getItem('family_month_mode')||(matchMedia('(max-width:700px)').matches?'agenda':'calendar'),EDIT_SHOP=null,EDIT_PLAN=null,EDIT_HEALTH=null,EDIT_ROUTINE=null,EDIT_DOC=null,DOCS=[],DOC_REVEALED=new Set(),CALENDAR_EVENT=null;
 const AUTH=window.supabase?.createClient?window.supabase.createClient(SUPA,KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:true,experimental:{passkey:true}}}):null;
 const $=id=>document.getElementById(id), colors={Joane:'joane',Laia:'laia',Alain:'alain',Igor:'igor',Mirari:'mirari',Athletic:'athletic','Bilbao Basket':'bilbao-basket','Sestao River':'sestao-river',Familia:'family'};
-const navs=[['home','Inicio'],['week','Semana'],['month','Mes'],['shop','Compras'],['plans','Cumples'],['health','Salud'],['races','Carreras'],['documents','Documentación'],['routines','Rutinas'],['sports','Deporte'],['cal','Calendarios']];
+const navs=[['home','Inicio'],['week','Semana'],['month','Mes'],['shop','Compras'],['plans','Cumples'],['health','Salud'],['cars','Coches'],['races','Carreras'],['documents','Documentación'],['routines','Rutinas'],['sports','Deporte'],['cal','Calendarios']];
 const RACES=[
 {id:'race-bilbao-night-2026',title:'Bilbao Night Run Fest · Media Maratón',event_date:'2026-10-17',start_time:'19:00',end_time:'21:45',distance:'21,0975 km',place:'Explanada de San Mamés, Bilbao',finish:'Museo Guggenheim Bilbao',status:'confirmed',status_text:'Confirmada',notes:'Salida escalonada desde las 19:00. Tiempo límite de la media maratón: 2 h 45 min.',source_url:'https://www.bilbaonightrun.com/reglamento'},
 {id:'race-behobia-2026',title:'Behobia – San Sebastián',event_date:'2026-11-08',start_time:'10:00',end_time:'13:00',distance:'20 km',place:'Puente Internacional de Behobia, Irun',finish:'Boulevard, Donostia / San Sebastián',status:'confirmed',status_text:'Confirmada',notes:'Salida de corredores a pie por grupos desde las 10:00; élite femenina a las 09:55.',source_url:'https://www.behobia-sansebastian.com/es/carrera/ficha-carrera'},
@@ -232,4 +233,4 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 setInterval(()=>{if(CODE&&document.visibilityState==='visible')load()},60000);
 function initCompactForms(){[['planform','Cumples y planes','Añadir plan'],['healthform','Salud','Añadir cita'],['routineform','Rutinas','Añadir rutina']].forEach(([id,title,label])=>{let form=$(id),container=form.parentElement,drawer=document.createElement('details'),summary=document.createElement('summary');container.classList.add('compactTools');drawer.className='formDrawer';drawer.id=id+'Drawer';summary.innerHTML=esc(title)+'<span>＋ '+esc(label)+'</span>';drawer.append(summary);container.insertBefore(drawer,form);drawer.append(form)})}
 initCompactForms();
-</script><script src="app-enhancements.js?v=2026.09.14.4"></script><script src="calendar-races-update.js?v=2026.09.14.4"></script><script src="packing.js?v=2026.09.14.4"></script><script src="navigation-fix.js?v=2026.09.14.4"></script><script src="home-dashboard.js?v=2026.09.14.4"></script><script src="home-upcoming-races.js?v=2026.09.14.4"></script><script src="packing-smart.js?v=2026.09.14.4"></script><script src="smart-features.js?v=2026.09.14.4"></script><script src="weekly-auto.js?v=2026.09.14.4"></script><script src="notification-fix.js?v=2026.09.14.4"></script><script src="family-upgrades.js?v=2026.09.14.4"></script><script src="family-upgrades-fix.js?v=2026.09.14.4"></script><script src="cars-fallback.js?v=2026.09.14.4"></script></body></html>
+</script><script src="app-enhancements.js?v=2026.09.14.5"></script><script src="calendar-races-update.js?v=2026.09.14.5"></script><script src="packing.js?v=2026.09.14.5"></script><script src="navigation-fix.js?v=2026.09.14.5"></script><script src="home-dashboard.js?v=2026.09.14.5"></script><script src="home-upcoming-races.js?v=2026.09.14.5"></script><script src="packing-smart.js?v=2026.09.14.5"></script><script src="smart-features.js?v=2026.09.14.5"></script><script src="weekly-auto.js?v=2026.09.14.5"></script><script src="notification-fix.js?v=2026.09.14.5"></script><script src="family-upgrades.js?v=2026.09.14.5"></script><script src="family-upgrades-fix.js?v=2026.09.14.5"></script><script src="cars-fallback.js?v=2026.09.14.5"></script></body></html>
