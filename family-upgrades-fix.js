@@ -17,6 +17,10 @@ function installStyles(){
   const style=document.createElement('style');
   style.id='carEditFixStyles';
   style.textContent=`
+#cars .carTopRow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 8px}
+#cars .carTopRow .title{margin:2px 0 0}
+#cars .carHomeBtn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 11px;font-weight:850;color:#2563eb;white-space:nowrap}
+#cars .carHomeBtn:active{background:#eff6ff}
 #cars .carVehicleGrid{margin:8px 0!important}
 #cars .carVehicleShell{position:relative;min-width:0}
 #cars .carVehicleShell .carVehicleCard{width:100%;margin:0;padding-right:82px;min-height:126px}
@@ -33,6 +37,8 @@ function installStyles(){
 #cars .carSectionLabel{margin-top:8px}
 #cars .carFutureHero{margin-top:4px}
 @media(max-width:700px){
+ #cars .carTopRow{margin-bottom:6px}
+ #cars .carHomeBtn{padding:7px 9px;font-size:12px}
  #cars .carVehicleGrid{grid-template-columns:1fr!important}
  #cars .carVehicleShell .carVehicleCard{padding-right:74px;min-height:118px}
  #cars .carInlineEdit{right:8px;top:8px;padding:7px 8px}
@@ -44,6 +50,31 @@ function installStyles(){
 
 function closeEdit(){const d=q('carEditDrawer');if(!d)return;d.open=false;d.hidden=true;if(q('carEditMsg'))q('carEditMsg').textContent=''}
 function closeAdd(clear=false){const d=q('carVehicleDrawer');if(!d)return;d.open=false;d.hidden=true;if(clear){if(q('carName'))q('carName').value='';if(q('carReg'))q('carReg').value='';if(q('carNotes'))q('carNotes').value='';if(q('carMsg'))q('carMsg').textContent=''}}
+
+function goHome(){
+  try{
+    if(typeof window.familySafeOpen==='function'){window.familySafeOpen('home');return}
+    if(typeof show==='function'){show('home');return}
+  }catch(e){}
+  const home=document.querySelector('#nav button[data-v="home"]');
+  if(home)home.click();
+}
+
+function ensureHomeNav(){
+  const section=q('cars');if(!section)return;
+  let title=section.querySelector(':scope > .title');
+  let row=q('carTopRow');
+  if(!row){
+    row=document.createElement('div');row.id='carTopRow';row.className='carTopRow';
+    const ey=section.querySelector(':scope > .ey');
+    if(title){title.parentNode.insertBefore(row,title);row.appendChild(title)}
+    else if(ey)ey.insertAdjacentElement('afterend',row);
+    const home=document.createElement('button');home.id='carHomeBtn';home.className='carHomeBtn';home.type='button';home.textContent='← Inicio';home.onclick=goHome;row.appendChild(home);
+  }else{
+    title=section.querySelector(':scope > .title');
+    if(title)row.insertBefore(title,row.firstChild);
+  }
+}
 
 function ensureEditDrawer(){
   const cards=q('carsCards');
@@ -109,6 +140,7 @@ function ensureActionBar(){
 function enhanceCards(){
   installStyles();
   const grid=q('carsCards');if(!grid)return;
+  ensureHomeNav();
   q('carVehicleEditTools')?.remove();
   const drawer=ensureEditDrawer();if(drawer&&!drawer.open)drawer.hidden=true;
   ensureAddDrawer();ensurePlannerDrawer();const bar=ensureActionBar();
@@ -125,7 +157,8 @@ function enhanceCards(){
   const edit=q('carEditDrawer'),add=q('carVehicleDrawer'),planner=q('carPlannerDrawer'),history=q('carHistoryDrawer');
   if(section&&title&&directLabel&&grid&&bar&&upcoming){
     directLabel.textContent='Tus coches';
-    title.insertAdjacentElement('afterend',directLabel);
+    const topRow=q('carTopRow');
+    (topRow||title).insertAdjacentElement('afterend',directLabel);
     directLabel.insertAdjacentElement('afterend',grid);
     grid.insertAdjacentElement('afterend',bar);
     bar.insertAdjacentElement('afterend',edit);
