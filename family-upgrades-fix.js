@@ -6,7 +6,6 @@ const carIds=['cvName','cvReg','cvNotes','crNext','crReminder','crTitle','crProv
 hasUnsaved=()=>unsavedIds.some(id=>document.getElementById(id)?.value?.trim())||carIds.some(id=>document.getElementById(id)?.value?.trim())||Boolean(document.getElementById('carRecordDrawer')?.open&&document.getElementById('crDate')?.value);
 
 const q=id=>document.getElementById(id);
-const escCar=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
 function selectedVehicle(){
   const id=document.querySelector('#carsCards .carVehicleCard.on')?.dataset.pick;
@@ -51,7 +50,8 @@ function ensureCarEditUi(){
   const v=selectedVehicle();
   tools.hidden=!v;
   const open=q('carEditOpen');
-  if(open)open.textContent=v?'✏️ Editar '+(v.name||'coche'):'✏️ Editar coche';
+  const label=v?'✏️ Editar '+(v.name||'coche'):'✏️ Editar coche';
+  if(open&&open.textContent!==label)open.textContent=label;
 }
 
 function openCarEdit(){
@@ -90,7 +90,6 @@ async function saveCarEdit(){
     });
     await load();
     if(typeof window.familyCarsRender==='function')window.familyCarsRender();
-    msg.textContent='Cambios guardados ✓';
     drawer.open=false;
   }catch(e){
     console.error(e);
@@ -128,9 +127,9 @@ let scheduled=false;
 function scheduleEnhance(){
   if(scheduled)return;
   scheduled=true;
-  queueMicrotask(()=>{scheduled=false;ensureCarEditUi()});
+  setTimeout(()=>{scheduled=false;ensureCarEditUi()},0);
 }
-new MutationObserver(scheduleEnhance).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
-document.addEventListener('click',e=>{if(e.target.closest?.('#carsCards .carVehicleCard'))queueMicrotask(ensureCarEditUi)});
+new MutationObserver(scheduleEnhance).observe(document.documentElement,{childList:true,subtree:true});
+document.addEventListener('click',e=>{if(e.target.closest?.('#carsCards .carVehicleCard'))setTimeout(ensureCarEditUi,0)});
 scheduleEnhance();
 })();
