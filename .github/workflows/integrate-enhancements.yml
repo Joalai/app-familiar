@@ -29,6 +29,16 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Normalize cars source
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('cars-fallback.js')
+          s=p.read_text()
+          s=s.replace("</div>`}\n}\nfunction renderPlanner", "</div>`;\n}\nfunction renderPlanner")
+          p.write_text(s)
+          PY
       - name: Check cars JavaScript
         run: node --check cars-fallback.js
       - name: Integrate enhancements in index
