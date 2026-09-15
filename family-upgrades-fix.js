@@ -48,6 +48,42 @@ function installStyles(){
   document.head.appendChild(style);
 }
 
+function installHealthStyles(){
+  if(q('healthLayoutStyles'))return;
+  const style=document.createElement('style');
+  style.id='healthLayoutStyles';
+  style.textContent=`
+#health .tools{grid-template-columns:1fr!important;gap:10px}
+#health .healthTop{margin-bottom:4px}
+#health .healthTop .title{margin-bottom:10px}
+#health .healthAppointmentsCard{order:1}
+#health #healthformDrawer{order:2;margin-top:0}
+#health #healthformDrawer>summary{padding:12px 14px}
+#health #healthform>.ey,#health #healthform>.title{display:none}
+#health #healthform{box-shadow:none;border-radius:0;border:0;padding-top:8px}
+@media(max-width:700px){#health .healthAppointmentsCard{padding:12px}#health #healthformDrawer>summary{padding:11px 12px}}
+`;
+  document.head.appendChild(style);
+}
+
+function enhanceHealthLayout(){
+  const section=q('health'),tools=section?.querySelector(':scope > .tools'),drawer=q('healthformDrawer'),list=q('hlist'),listCard=list?.closest('.card');
+  if(!section||!tools||!drawer||!listCard)return;
+  installHealthStyles();
+  let top=q('healthTop');
+  if(!top){
+    top=document.createElement('div');top.id='healthTop';top.className='healthTop';
+    top.innerHTML='<div class="ey">Agenda sanitaria compartida</div><div class="title">🩺 Salud</div>';
+    section.insertBefore(top,tools);
+  }
+  listCard.classList.add('healthAppointmentsCard');
+  const listTitle=listCard.querySelector('.title');
+  if(listTitle)listTitle.textContent='Próximas citas';
+  const summary=drawer.querySelector(':scope > summary');
+  if(summary)summary.innerHTML='Añadir cita <span>＋ Nueva cita</span>';
+  if(tools.firstElementChild!==listCard)tools.insertBefore(listCard,drawer);
+}
+
 function closeEdit(){const d=q('carEditDrawer');if(!d)return;d.open=false;d.hidden=true;if(q('carEditMsg'))q('carEditMsg').textContent=''}
 function closeAdd(clear=false){const d=q('carVehicleDrawer');if(!d)return;d.open=false;d.hidden=true;if(clear){if(q('carName'))q('carName').value='';if(q('carReg'))q('carReg').value='';if(q('carNotes'))q('carNotes').value='';if(q('carMsg'))q('carMsg').textContent=''}}
 
@@ -207,8 +243,9 @@ function syncCars(force=false){
 document.addEventListener('click',e=>{
   const edit=e.target.closest?.('[data-edit-vehicle]');if(edit){e.preventDefault();e.stopPropagation();openVehicle(edit.dataset.editVehicle);return}
   if(e.target.closest?.('#nav button[data-v="cars"]'))setTimeout(()=>syncCars(true),0);
+  if(e.target.closest?.('#nav button[data-v="health"]'))setTimeout(enhanceHealthLayout,0);
   if(e.target.closest?.('#carsCards .carVehicleCard'))setTimeout(enhanceCards,0);
 });
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(()=>syncCars(true),100)});
-setTimeout(()=>syncCars(true),150);setInterval(()=>syncCars(false),1500);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){setTimeout(()=>syncCars(true),100);setTimeout(enhanceHealthLayout,100)}});
+setTimeout(()=>{syncCars(true);enhanceHealthLayout()},150);setInterval(()=>{syncCars(false);enhanceHealthLayout()},1500);
 })();
