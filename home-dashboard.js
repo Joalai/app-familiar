@@ -9,6 +9,7 @@ const SECTIONS=[
  ]},
  {group:'Familia',items:[
   {id:'shop',icon:'🛒',title:'Compras',desc:'Lista compartida'},
+  {id:'tasks',icon:'✅',title:'Tareas',desc:'Pendientes y responsables'},
   {id:'packing',icon:'🧳',title:'Maleta',desc:'Listas por persona y viaje'},
   {id:'health',icon:'🩺',title:'Salud',desc:'Citas y revisiones'},
   {id:'cars',icon:'🚗',title:'Coches',desc:'ITV, seguro y taller'},
