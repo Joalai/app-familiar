@@ -1,4 +1,4 @@
-const APP_PATCH_VERSION='2026.09.15.1';
+const APP_PATCH_VERSION='2026.09.15.2';
 
 self.addEventListener('install',()=>self.skipWaiting());
 self.addEventListener('activate',event=>event.waitUntil((async()=>{
