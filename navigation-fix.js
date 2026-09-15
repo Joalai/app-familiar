@@ -19,6 +19,7 @@
       else if(v==='sports'&&typeof rs==='function')rs();
       else if(v==='cal'&&typeof rc==='function')rc();
       else if(v==='packing'&&typeof window.familyPackingLoad==='function')window.familyPackingLoad();
+      else if(v==='tasks'&&typeof window.familyTasksOpen==='function')window.familyTasksOpen();
     }catch(err){
       console.error('Error al renderizar '+v,err);
     }
@@ -32,6 +33,10 @@
         if(dirty&&!confirm('Hay cambios de documentación sin guardar. ¿Salir igualmente?'))return false;
         if(typeof lockDocuments==='function')lockDocuments();
       }catch(e){}
+    }
+    if(v==='tasks'&&typeof window.familyTasksOpen==='function'){
+      window.familyTasksOpen();
+      return true;
     }
     if(!activateView(v))return false;
     renderView(v);
@@ -57,17 +62,43 @@
     const existing=[...document.scripts].some(s=>(s.src||'').includes('family-upgrades.js'));
     if(existing)return;
     const s=document.createElement('script');
-    s.src='family-upgrades.js?v=2026.09.14.3';
+    s.src='family-upgrades.js?v=2026.09.15.5';
     s.dataset.familyUpgrades='1';
     s.onload=()=>{
       if([...document.scripts].some(x=>(x.src||'').includes('family-upgrades-fix.js')))return;
       const f=document.createElement('script');
-      f.src='family-upgrades-fix.js?v=2026.09.14.3';
+      f.src='family-upgrades-fix.js?v=2026.09.15.5';
       f.dataset.familyUpgradesFix='1';
       document.body.appendChild(f);
     };
     document.body.appendChild(s);
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(loadFamilyUpgrades,0),{once:true});
-  else setTimeout(loadFamilyUpgrades,0);
+
+  // Tareas debe cargarse también desde un archivo que ya forma parte del HTML
+  // base. Así no dependemos de que el service worker haya podido inyectar el
+  // módulo nuevo en una instalación antigua de iOS.
+  function loadTasksModule(){
+    try{
+      if(!Object.getOwnPropertyDescriptor(window,'D')){
+        Object.defineProperty(window,'D',{configurable:true,get:()=>D});
+      }
+    }catch(e){}
+    if(window.familyTasksModuleLoaded)return;
+    if([...document.scripts].some(s=>(s.src||'').includes('tasks.js')))return;
+    const s=document.createElement('script');
+    s.src='tasks.js?v=2026.09.15.5';
+    s.dataset.familyTasks='1';
+    document.body.appendChild(s);
+  }
+
+  function bootFallbacks(){
+    setTimeout(loadFamilyUpgrades,0);
+    setTimeout(loadTasksModule,60);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootFallbacks,{once:true});
+  else bootFallbacks();
+
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible')setTimeout(loadTasksModule,50);
+  });
 })();
