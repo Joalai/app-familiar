@@ -62,12 +62,12 @@
     const existing=[...document.scripts].some(s=>(s.src||'').includes('family-upgrades.js'));
     if(existing)return;
     const s=document.createElement('script');
-    s.src='family-upgrades.js?v=2026.09.15.5';
+    s.src='family-upgrades.js?v=2026.09.16.1';
     s.dataset.familyUpgrades='1';
     s.onload=()=>{
       if([...document.scripts].some(x=>(x.src||'').includes('family-upgrades-fix.js')))return;
       const f=document.createElement('script');
-      f.src='family-upgrades-fix.js?v=2026.09.15.5';
+      f.src='family-upgrades-fix.js?v=2026.09.16.1';
       f.dataset.familyUpgradesFix='1';
       document.body.appendChild(f);
     };
@@ -86,19 +86,34 @@
     if(window.familyTasksModuleLoaded)return;
     if([...document.scripts].some(s=>(s.src||'').includes('tasks.js')))return;
     const s=document.createElement('script');
-    s.src='tasks.js?v=2026.09.15.5';
+    s.src='tasks.js?v=2026.09.16.1';
     s.dataset.familyTasks='1';
+    document.body.appendChild(s);
+  }
+
+  // Sincronización entre móviles. La cargamos también desde navigation-fix,
+  // que ya existe en instalaciones antiguas, para no depender solo del SW.
+  function loadSyncModule(){
+    if(window.familyLiveSyncLoaded)return;
+    if([...document.scripts].some(s=>(s.src||'').includes('sync-fix.js')))return;
+    const s=document.createElement('script');
+    s.src='sync-fix.js?v=2026.09.16.1';
+    s.dataset.familySync='1';
     document.body.appendChild(s);
   }
 
   function bootFallbacks(){
     setTimeout(loadFamilyUpgrades,0);
     setTimeout(loadTasksModule,60);
+    setTimeout(loadSyncModule,120);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootFallbacks,{once:true});
   else bootFallbacks();
 
   document.addEventListener('visibilitychange',()=>{
-    if(document.visibilityState==='visible')setTimeout(loadTasksModule,50);
+    if(document.visibilityState==='visible'){
+      setTimeout(loadTasksModule,50);
+      setTimeout(loadSyncModule,90);
+    }
   });
 })();
