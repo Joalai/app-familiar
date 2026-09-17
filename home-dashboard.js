@@ -8,6 +8,7 @@ const SECTIONS=[
   {id:'cal',icon:'🧭',title:'Calendarios',desc:'Combina calendarios'}
  ]},
  {group:'Familia',items:[
+  {id:'inbox',icon:'📥',title:'Bandeja',desc:'Captura y clasifica después'},
   {id:'shop',icon:'🛒',title:'Compras',desc:'Lista compartida'},
   {id:'tasks',icon:'✅',title:'Tareas',desc:'Pendientes y responsables'},
   {id:'packing',icon:'🧳',title:'Maleta',desc:'Listas por persona y viaje'},
