@@ -60,7 +60,7 @@ jobs:
               s=s.replace('<section id="sports" class="view">', cars_section+'<section id="sports" class="view">')
 
           # El estado principal D es una variable global lexical, no window.D.
-          s=s.replace("D={events:[],shopping:[],recurring:[],members:[],school_calendar:[],inbox:[]}", "D={events:[],shopping:[],recurring:[],members:[],school_calendar:[],vehicles:[],vehicle_records:[]}")
+          s=s.replace("D={events:[],shopping:[],recurring:[],members:[],school_calendar:[],vehicles:[],vehicle_records:[]}", "D={events:[],shopping:[],recurring:[],members:[],school_calendar:[],vehicles:[],vehicle_records:[],tasks:[],inbox:[]}")
 
           for script in ['app-enhancements.js','calendar-races-update.js','packing.js','navigation-fix.js','home-dashboard.js','home-upcoming-races.js','packing-smart.js','smart-features.js','weekly-auto.js','notification-fix.js','family-upgrades.js','family-upgrades-fix.js','cars-fallback.js','family-inbox.js']:
               pat=rf'<script src="{re.escape(script)}\?v=[^"]+"></script>'
