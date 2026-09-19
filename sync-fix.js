@@ -26,6 +26,7 @@ function resetHiddenUpcomingFilter(){
 }
 
 function userIsEditing(){
+  try{if(typeof hasUnsaved==='function'&&hasUnsaved())return true}catch(e){}
   const a=document.activeElement;
   if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)){
     const type=String(a.type||'').toLowerCase();
