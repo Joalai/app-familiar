@@ -162,8 +162,8 @@ async function nfRefresh(force=false){
 const oldUpdate=typeof updateNotifyButton==='function'?updateNotifyButton:null;if(oldUpdate){updateNotifyButton=function(){oldUpdate();setTimeout(nfRender,0)}}
 nfDetailHooks();
 document.addEventListener('family-upcoming-rendered',()=>nfRefresh(false));
+document.addEventListener('family-data-synced',()=>nfRefresh(false));
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')nfRefresh(true)});
 window.addEventListener('focus',()=>nfRefresh(false));
-setInterval(()=>nfRefresh(false),20000);
 setTimeout(()=>nfRefresh(true),250);
 })();

@@ -123,9 +123,14 @@ async function assignTask(id,value){try{await rpc('family_assign_task',{p_code:C
 async function deleteTask(){if(!editId)return;const x=tasks().find(t=>t.id===editId);if(!confirm(`¿Eliminar “${x?.title||'esta tarea'}”?`))return;try{await rpc('family_delete_task',{p_code:CODE,p_id:editId});resetForm();await load();lastSig='';render()}catch(e){console.error(e);$t('taskMsg').textContent='No se ha podido eliminar la tarea.'}}
 
 function signature(){return JSON.stringify(tasks().map(x=>[x.id,x.title,x.due_date,x.assignees,x.is_done,x.updated_at]))}
-function sync(){makeSection();const sig=signature();if(sig!==lastSig){lastSig=sig;render()}}
-
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(sync,100)});
-setTimeout(sync,250);setInterval(sync,1800);
+function taskEditing(){
+ const a=document.activeElement;
+ return !!(a&&$t('tasks')?.contains(a)&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName));
+}
+function sync(){makeSection();if(taskEditing())return;const sig=signature();if(sig!==lastSig){lastSig=sig;render()}}
+document.addEventListener('family-data-synced',()=>setTimeout(sync,0));
+document.addEventListener('click',e=>{if(e.target.closest?.('#nav button[data-v="tasks"]'))setTimeout(sync,0)});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(sync,120)});
+setTimeout(sync,250);
 window.familyTasksRender=sync;
 })();

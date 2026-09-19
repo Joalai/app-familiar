@@ -1,11 +1,10 @@
-const APP_PATCH_VERSION='2026.09.19.7';
+const APP_PATCH_VERSION='2026.09.20.2';
 
 self.addEventListener('install',()=>self.skipWaiting());
+
 self.addEventListener('activate',event=>event.waitUntil((async()=>{
   await caches.keys().then(keys=>Promise.all(keys.map(key=>caches.delete(key))));
   await self.clients.claim();
-  const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true});
-  await Promise.all(clients.map(client=>client.navigate(client.url).catch(()=>null)));
 })()));
 
 self.addEventListener('fetch',event=>{
@@ -20,16 +19,20 @@ self.addEventListener('fetch',event=>{
       let html=await response.text();
       html=html.replace(/const APP_VERSION='[^']+';/,"const APP_VERSION='"+APP_PATCH_VERSION+"';");
       html=html.replace(/(\.js\?v=)[^"'&<]+/g,'$1'+APP_PATCH_VERSION);
-      const scripts=['app-enhancements.js','calendar-races-update.js','packing.js','navigation-fix.js','home-dashboard.js','home-upcoming-races.js','packing-smart.js','smart-features.js','weekly-auto.js','notification-fix.js','family-upgrades.js','family-upgrades-fix.js','section-priority-fix.js','tasks.js','sync-fix.js','cars-fallback.js','cars-v2.js','family-inbox.js'];
-      for(const script of scripts){
-        if(!html.includes(script))html=html.replace('</body>','<script src="'+script+'?v='+APP_PATCH_VERSION+'"></script></body>');
-      }
       const headers=new Headers(response.headers);
       headers.set('cache-control','no-store');
       headers.delete('content-length');
       return new Response(html,{status:response.status,statusText:response.statusText,headers});
-    }catch(e){return fetch(request)}
+    }catch(e){
+      return fetch(request);
+    }
   })());
 });
 
-self.addEventListener('notificationclick',event=>{event.notification.close();event.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(clients=>clients[0]?clients[0].focus():self.clients.openWindow('./')))});
+self.addEventListener('notificationclick',event=>{
+  event.notification.close();
+  event.waitUntil(
+    self.clients.matchAll({type:'window',includeUncontrolled:true})
+      .then(clients=>clients[0]?clients[0].focus():self.clients.openWindow('./'))
+  );
+});

@@ -75,7 +75,7 @@
 <script>
 const SUPA='https://gjplhfinujyhjxpahcak.supabase.co';
 const KEY='sb_publishable_8WLfOB17Uhnyd9jNWFdyDA_ewE7yxVO';
-const APP_VERSION='2026.09.19.7';
+const APP_VERSION='2026.09.20.2';
 const FAMILY_USERS=['Igor','Mirari','Joane','Laia','Alain'];
 function canonicalUser(name){let value=String(name||'').trim().toLocaleLowerCase('es');return FAMILY_USERS.find(x=>x.toLocaleLowerCase('es')===value)||''}
 let CODE=localStorage.getItem('family_code')||'',USER=canonicalUser(localStorage.getItem('family_user')),D={events:[],shopping:[],recurring:[],members:[],school_calendar:[],vehicles:[],vehicle_records:[],tasks:[],inbox:[]},W=new Date(),M=new Date(),S=new Date(),C='Todos',MONTH_MODE=localStorage.getItem('family_month_mode')||(matchMedia('(max-width:700px)').matches?'agenda':'calendar'),EDIT_SHOP=null,EDIT_PLAN=null,EDIT_HEALTH=null,EDIT_ROUTINE=null,EDIT_DOC=null,DOCS=[],DOC_REVEALED=new Set(),CALENDAR_EVENT=null;
@@ -220,18 +220,36 @@ async function enableNotifications(){if(!('Notification' in window)){alert('En i
 async function showNewEventNotification(items){if(!notificationEnabled()||Notification.permission!=='granted')return;let reg=await notificationRegistration();if(!reg)return;let title=items.length===1?'Nuevo acontecimiento':'Nuevos acontecimientos',body=items.length===1?displayTitle(items[0]):`${items.length} acontecimientos nuevos`;reg.showNotification(title,{body,icon:'assets/app-icon-192.png',badge:'assets/app-icon-192.png',tag:'family-new-events',renotify:true,data:{url:'./'}}).catch(()=>{})}
 function checkNewEvents(){let ids=eventIds();if(localStorage.getItem(NOTIFY_SEEDED)!=='1'){localStorage.setItem(NOTIFY_SEEDED,'1');localStorage.setItem(NOTIFY_KNOWN,JSON.stringify(ids));updateNotifyButton();return}let known;try{known=JSON.parse(localStorage.getItem(NOTIFY_KNOWN)||'[]')}catch(e){known=[]}let fresh=(D.events||[]).filter(x=>!known.includes(x.id));localStorage.setItem(NOTIFY_KNOWN,JSON.stringify(ids));if(fresh.length&&notificationEnabled()){localStorage.setItem(NOTIFY_UNREAD,String(Number(localStorage.getItem(NOTIFY_UNREAD)||0)+fresh.length));showNewEventNotification(fresh)}updateNotifyButton()}
 function clearNotifications(){localStorage.setItem(NOTIFY_UNREAD,'0');updateNotifyButton();show('home')}
-function hasUnsaved(){return ['sn','sd','pn','pd','ph','pe','pp','pnotes','hn','hd','hh','he','hp','hnotes','rn','rst','ren','rfrom','runtil','rplace','docNumber','docExpiry','cvTitle','cvDate','cvTime','cvPlace','cvReminder','cvProvider','cvMileage','cvAmount','cvNotes','cvCarName','cvCarReg','cvCarNotes','vvName','vvMake','vvModel','vvYear','vvReg','vvVin','vvKm','vvNotes'].some(id=>$(id)?.value?.trim())}
+function hasUnsaved(){return ['sn','sd','pn','pd','ph','pe','pp','pnotes','hn','hd','hh','he','hp','hnotes','rn','rst','ren','rfrom','runtil','rplace','docNumber','docExpiry','cvTitle','cvDate','cvTime','cvPlace','cvReminder','cvProvider','cvMileage','cvAmount','cvNotes','cvCarName','cvCarReg','cvCarNotes','vvName','vvMake','vvModel','vvYear','vvReg','vvVin','vvKm','vvNotes','taskTitle','taskDue','taskNotes','inboxText'].some(id=>$(id)?.value?.trim())}
 function reloadVersion(v){if(sessionStorage.getItem('version_reload')===v)return;sessionStorage.setItem('version_reload',v);let u=new URL(location.href);u.searchParams.set('v',v);location.replace(u.href)}
-async function checkVersion(){try{let r=await fetch('version.json?t='+Date.now(),{cache:'no-store'}),j=await r.json();if(!j.version||j.version===APP_VERSION)return;if(hasUnsaved()){$('update').classList.add('show');$('updateNow').onclick=()=>reloadVersion(j.version)}else reloadVersion(j.version)}catch(e){}}
+async function checkVersion(){try{let r=await fetch('version.json?t='+Date.now(),{cache:'no-store'}),j=await r.json();if(!j.version||j.version===APP_VERSION)return;$('update').classList.add('show');$('updateNow').onclick=()=>reloadVersion(j.version)}catch(e){}}
 document.querySelectorAll('[data-month-mode]').forEach(b=>b.onclick=()=>setMonthMode(b.dataset.monthMode));$('closeDetail').onclick=()=>$('detailDialog').close();document.addEventListener('click',e=>{if(e.target.closest('button,a,input,label'))return;let event=e.target.closest('[data-detail-event]'),routine=e.target.closest('[data-detail-routine]');if(event)openEventDetail(event.dataset.detailEvent);else if(routine)openRoutineDetail(routine.dataset.detailRoutine,routine.dataset.date)});
 $('docUnlock').onclick=unlockDocuments;$('docShowSetup').onclick=()=>$('docSetup').classList.toggle('hidden');$('docSendLink').onclick=sendDocumentLink;$('docRegister').onclick=registerDocumentPasskey;$('docPerson').onchange=updateDocumentTypes;$('docSave').onclick=saveDocument;$('docCancel').onclick=resetDocument;$('docLock').onclick=()=>lockDocuments();initDocumentAuth();
 initnav();initPeoplePickers();setMonthMode(MONTH_MODE);$('userBtn').textContent=USER?'👤 '+USER:'👤 Mi nombre';$('userBtn').onclick=setUser;$('enter').onclick=()=>{CODE=$('code').value.trim().toUpperCase();localStorage.setItem('family_code',CODE);load()};$('code').onkeydown=e=>{if(e.key==='Enter')$('enter').click()};document.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{W.setDate(W.getDate()+Number(b.dataset.w)*7);rw()});document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{M.setMonth(M.getMonth()+Number(b.dataset.m));rm()});document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{S.setMonth(S.getMonth()+Number(b.dataset.s));rs()});$('as').onclick=addShopping;$('ap').onclick=addPlan;$('ah').onclick=addHealth;$('ar').onclick=saveRoutine;$('cancelShop').onclick=resetShopping;$('cancelPlan').onclick=resetPlan;$('cancelHealth').onclick=resetHealth;$('cancelRoutine').onclick=resetRoutine;$('voiceShop').onclick=()=>listen('voiceShop','shopvoice',fillVoiceShop);$('voicePlan').onclick=()=>listen('voicePlan','voicemsg',fillVoicePlan);$('voiceHealth').onclick=()=>listen('voiceHealth','healthvoice',fillVoiceHealth);$('sn').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addShopping()}});$('closeCalendar').onclick=()=>$('calendarDialog').close();$('toGoogle').onclick=()=>{if(CALENDAR_EVENT)window.open(googleCalendar(CALENDAR_EVENT),'_blank','noopener');$('calendarDialog').close()};$('toApple').onclick=()=>{if(CALENDAR_EVENT)downloadIcs(CALENDAR_EVENT);$('calendarDialog').close()};window.addEventListener('beforeunload',e=>{if(hasUnsaved()){e.preventDefault();e.returnValue=''}});checkVersion();setInterval(checkVersion,300000);if(CODE){$('code').value=CODE;load()}
 $('toApple').onclick=async()=>{if(!CALENDAR_EVENT)return;let button=$('toApple'),label=button.textContent;button.disabled=true;button.textContent='Preparando…';try{await downloadIcs(CALENDAR_EVENT);$('calendarDialog').close()}catch(e){if(e.name!=='AbortError')alert('No se ha podido preparar el archivo para Apple Calendar.')}finally{button.disabled=false;button.textContent=label}};
 $('notifyBtn').onclick=()=>notificationEnabled()?clearNotifications():enableNotifications();
 updateNotifyButton();notificationRegistration();
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&CODE)load()});
-setInterval(()=>{if(CODE&&document.visibilityState==='visible')load()},60000);
+// La sincronización en segundo plano se gestiona únicamente desde sync-fix.js.
+// Evitamos recargar toda la interfaz mientras alguien está escribiendo.
 function initCompactForms(){[['planform','Cumples y planes','Añadir plan'],['healthform','Salud','Añadir cita'],['routineform','Rutinas','Añadir rutina']].forEach(([id,title,label])=>{let form=$(id),container=form.parentElement,drawer=document.createElement('details'),summary=document.createElement('summary');container.classList.add('compactTools');drawer.className='formDrawer';drawer.id=id+'Drawer';summary.innerHTML=esc(title)+'<span>＋ '+esc(label)+'</span>';drawer.append(summary);container.insertBefore(drawer,form);drawer.append(form)})}
 initCompactForms();
-</script><script src="app-enhancements.js?v=2026.09.19.7"></script><script src="calendar-races-update.js?v=2026.09.19.7"></script><script src="packing.js?v=2026.09.19.7"></script><script src="navigation-fix.js?v=2026.09.19.7"></script><script src="home-dashboard.js?v=2026.09.19.7"></script><script src="home-upcoming-races.js?v=2026.09.19.7"></script><script src="packing-smart.js?v=2026.09.19.7"></script><script src="smart-features.js?v=2026.09.19.7"></script><script src="weekly-auto.js?v=2026.09.19.7"></script><script src="notification-fix.js?v=2026.09.19.7"></script><script src="family-upgrades.js?v=2026.09.19.7"></script><script src="family-upgrades-fix.js?v=2026.09.19.7"></script><script src="tasks.js?v=2026.09.19.7"></script><script src="cars-fallback.js?v=2026.09.19.7"></script>
-<script src="cars-v2.js?v=2026.09.19.7"></script><script src="family-inbox.js?v=2026.09.19.7"></script><script src="subscriptions.js?v=2026.09.20.1"></script></body></html>
+</script><script src="app-enhancements.js?v=2026.09.20.2"></script>
+<script src="calendar-races-update.js?v=2026.09.20.2"></script>
+<script src="packing.js?v=2026.09.20.2"></script>
+<script src="navigation-fix.js?v=2026.09.20.2"></script>
+<script src="home-dashboard.js?v=2026.09.20.2"></script>
+<script src="home-upcoming-races.js?v=2026.09.20.2"></script>
+<script src="packing-smart.js?v=2026.09.20.2"></script>
+<script src="smart-features.js?v=2026.09.20.2"></script>
+<script src="weekly-auto.js?v=2026.09.20.2"></script>
+<script src="notification-fix.js?v=2026.09.20.2"></script>
+<script src="family-upgrades.js?v=2026.09.20.2"></script>
+<script src="family-upgrades-fix.js?v=2026.09.20.2"></script>
+<script src="section-priority-fix.js?v=2026.09.20.2"></script>
+<script src="tasks.js?v=2026.09.20.2"></script>
+<script src="cars-v2.js?v=2026.09.20.2"></script>
+<script src="family-inbox.js?v=2026.09.20.2"></script>
+<script src="sync-fix.js?v=2026.09.20.2"></script>
+<script src="subscriptions.js?v=2026.09.20.2"></script>
+<script src="stability-core.js?v=2026.09.20.2"></script>
+</body></html>

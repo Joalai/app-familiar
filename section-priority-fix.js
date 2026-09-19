@@ -102,7 +102,10 @@ document.addEventListener('click',e=>{
   const nav=e.target.closest?.('#nav button[data-v]');
   if(nav&&(nav.dataset.v==='plans'||nav.dataset.v==='routines'))setTimeout(()=>refreshSection(nav.dataset.v),0);
 });
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(()=>{installPlanRendering();enhancePrioritySections()},100)});
+document.addEventListener('family-data-synced',()=>{
+  const active=document.querySelector('.view.on')?.id;
+  if(active==='plans'||active==='routines')setTimeout(()=>refreshSection(active),0);
+});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(()=>{installPlanRendering();enhancePrioritySections()},120)});
 setTimeout(()=>{installPlanRendering();enhancePrioritySections()},220);
-setInterval(enhancePrioritySections,1800);
 })();
