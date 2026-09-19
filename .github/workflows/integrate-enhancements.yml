@@ -50,7 +50,7 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           import re
-          VERSION='2026.09.19.4'
+          VERSION='2026.09.19.5'
           p=Path('index.html')
           s=p.read_text()
           s=re.sub(r"const APP_VERSION='[^']+';", f"const APP_VERSION='{VERSION}';", s)
