@@ -38,6 +38,7 @@ function styles(){if($t('tasksStyles'))return;const st=document.createElement('s
 #tasks .taskCard:last-child{border-bottom:0}.taskCheck{width:34px;height:34px;border:2px solid #cbd5e1;background:#fff;border-radius:11px;font-size:18px;font-weight:900;color:#16a34a}
 .taskTitle{font-size:16px;font-weight:900;line-height:1.2}.taskMeta{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}.taskBadge{display:inline-flex;align-items:center;min-height:28px;padding:5px 8px;border-radius:9px;font-size:12px;font-weight:900;background:#f1f5f9;color:#475569}.taskBadge.overdue{background:#fee2e2;color:#b91c1c}.taskBadge.today{background:#ffedd5;color:#c2410c}.taskBadge.soon{background:#fef3c7;color:#92400e}.taskWho{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}.taskWho.unassigned{background:#f8fafc;color:#64748b;border-color:#e2e8f0}.taskNotes{font-size:12px;color:var(--mut);margin-top:6px;line-height:1.35}.taskActions{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:8px}.taskAssign{width:auto;min-width:125px;padding:7px 9px;font-size:13px;font-weight:800}.taskEdit,.taskWhatsApp{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 10px;font-weight:800}.taskEdit{color:#2563eb}.taskWhatsApp{color:#128c7e}.taskListCard{margin-bottom:10px}.taskAddDrawer>summary,.taskDoneDrawer>summary{padding:12px 14px}.taskDoneCard{opacity:.72}.taskDoneCard .taskTitle{text-decoration:line-through}.taskEmpty{padding:12px 0;color:var(--mut)}
 @media(max-width:700px){#tasks .taskHome{font-size:12px;padding:7px 9px}.taskTitle{font-size:17px}.taskBadge{font-size:13px}.taskActions{align-items:stretch}.taskAssign{flex:1}.taskEdit,.taskWhatsApp{min-width:72px}}
+#coming .homeTaskCard{background:#ecfdf514;border-color:#a7f3d0}#coming .homeTaskCard strong{color:#065f46}#coming .homeTaskActions{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
 `;document.head.appendChild(st)}
 
 function makeSection(){
@@ -84,10 +85,28 @@ function render(){
  makeSection();const open=tasks().filter(x=>!x.is_done).sort(sortOpen),done=tasks().filter(x=>x.is_done).sort((a,b)=>String(b.completed_at||b.updated_at||'').localeCompare(String(a.completed_at||a.updated_at||'')));
  $t('taskList').innerHTML=open.length?open.map(x=>taskRow(x,false)).join(''):'<div class="taskEmpty">No hay tareas pendientes.</div>';
  $t('taskDoneList').innerHTML=done.length?done.map(x=>taskRow(x,true)).join(''):'<div class="taskEmpty">Todavía no hay tareas terminadas.</div>';
- $t('taskDoneCount').textContent=String(done.length);bind();
+ $t('taskDoneCount').textContent=String(done.length);bind();renderHomeTasks();
 }
 
 function shareTask(id){const x=tasks().find(t=>t.id===id);if(!x)return;const parts=[`✅ *${x.title}*`];if(x.due_date){let d=x.due_date;try{d=new Intl.DateTimeFormat('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date(x.due_date+'T12:00:00'))}catch(e){}parts.push(`📅 Fecha límite: ${d}`)}const who=assigneeText(x.assignees);if(who!=='Sin asignar')parts.push(`👤 Responsable: ${who}`);if(x.notes)parts.push(`📝 ${x.notes}`);const url='https://wa.me/?text='+encodeURIComponent(parts.join('\n'));window.open(url,'_blank','noopener,noreferrer')}
+
+function homeTaskDate(ds){const d=new Date(ds+'T12:00:00'),wd=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][d.getDay()],mo=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][d.getMonth()];return `<div class="date"><span>${wd}</span><b>${d.getDate()}</b><small>${mo}</small></div>`}
+function homeTaskMonday(ds){const d=new Date(ds+'T12:00:00');d.setDate(d.getDate()-((d.getDay()+6)%7));return d}
+function homeTaskFmt(d){return new Intl.DateTimeFormat('es-ES',{day:'numeric',month:'short'}).format(d)}
+function homeTaskHeader(ds){const d=homeTaskMonday(ds),z=new Date(d);z.setDate(z.getDate()+6);return `SEMANA · ${homeTaskFmt(d)} – ${homeTaskFmt(z)}`}
+function renderHomeTasks(){
+ const coming=$t('coming');if(!coming)return;
+ coming.querySelectorAll('.homeTaskCard').forEach(x=>x.remove());
+ coming.querySelectorAll('[data-home-task-group="1"]').forEach(x=>x.remove());
+ const now=new Date(),today=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0'),limit=new Date(now);limit.setDate(limit.getDate()+60);const end=limit.getFullYear()+'-'+String(limit.getMonth()+1).padStart(2,'0')+'-'+String(limit.getDate()).padStart(2,'0');
+ const open=tasks().filter(x=>!x.is_done&&x.due_date&&x.due_date>=today&&x.due_date<=end).sort(sortOpen);if(!open.length)return;
+ const headings=[];let monday=homeTaskMonday(today);for(let i=0;i<10;i++){let d=new Date(monday);d.setDate(d.getDate()+i*7);let z=new Date(d);z.setDate(z.getDate()+6);headings.push(`SEMANA · ${homeTaskFmt(d)} – ${homeTaskFmt(z)}`)}
+ const findGroup=header=>[...coming.querySelectorAll('.group')].find(g=>g.querySelector(':scope > .ghead')?.textContent.trim()===header);
+ const makeGroup=header=>{const g=document.createElement('div');g.className='group';g.dataset.homeTaskGroup='1';g.innerHTML=`<div class="ghead">${safe(header)}</div><div class="cards"></div>`;const targetIndex=headings.indexOf(header);const next=[...coming.querySelectorAll('.group')].find(x=>{const h=x.querySelector(':scope > .ghead')?.textContent.trim()||'';return headings.indexOf(h)>targetIndex});next?coming.insertBefore(g,next):coming.appendChild(g);return g};
+ open.forEach(x=>{const header=homeTaskHeader(x.due_date),g=findGroup(header)||makeGroup(header),card=document.createElement('div'),who=assigneeText(x.assignees);card.className='ev homeTaskCard';card.dataset.homeTask=x.id;card.innerHTML=homeTaskDate(x.due_date)+`<div><strong>✅ ${safe(x.title)}</strong><em>Tarea${who!=='Sin asignar'?' · '+safe(who):''}${x.notes?' · '+safe(x.notes):''}</em><div class="homeTaskActions"><button type="button" class="miniBtn" data-home-task-open="${safe(x.id)}">Tareas</button><button type="button" class="miniBtn" data-home-task-wa="${safe(x.id)}">WhatsApp</button></div></div>`;g.querySelector('.cards').appendChild(card)});
+ coming.querySelectorAll('[data-home-task-open]').forEach(b=>b.onclick=e=>{e.stopPropagation();openTasks()});
+ coming.querySelectorAll('[data-home-task-wa]').forEach(b=>b.onclick=e=>{e.stopPropagation();shareTask(b.dataset.homeTaskWa)});
+}
 
 function resetForm(){editId=null;$t('taskTitle').value='';$t('taskDue').value='';$t('taskAssignee').value='';$t('taskNotes').value='';$t('taskSave').textContent='Guardar tarea';$t('taskDelete').hidden=true;$t('taskMsg').textContent='';$t('taskFormDrawer').open=false}
 function editTask(id){const x=tasks().find(t=>t.id===id);if(!x)return;editId=id;$t('taskTitle').value=x.title||'';$t('taskDue').value=x.due_date||'';$t('taskAssignee').value=assigneeValue(x.assignees);$t('taskNotes').value=x.notes||'';$t('taskSave').textContent='Guardar cambios';$t('taskDelete').hidden=false;$t('taskMsg').textContent='';$t('taskFormDrawer').open=true;$t('taskFormDrawer').scrollIntoView({behavior:'smooth',block:'nearest'})}
