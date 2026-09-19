@@ -14,7 +14,8 @@ const SECTIONS=[
   {id:'packing',icon:'🧳',title:'Maleta',desc:'Listas por persona y viaje'},
   {id:'health',icon:'🩺',title:'Salud',desc:'Citas y revisiones'},
   {id:'cars',icon:'🚗',title:'Coches',desc:'ITV, seguro y taller'},
-  {id:'documents',icon:'🪪',title:'Documentación',desc:'DNI, pasaportes y carnets'}
+  {id:'documents',icon:'🪪',title:'Documentación',desc:'DNI, pasaportes y carnets'},
+  {id:'subscriptions',icon:'💳',title:'Suscripciones',desc:'Costes y renovaciones'}
  ]},
  {group:'Actividades',items:[
   {id:'plans',icon:'🎂',title:'Cumples y planes',desc:'Invitaciones y planes'},
