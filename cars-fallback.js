@@ -61,5 +61,8 @@ async function savePlan(){const msg=$c('planMsg'),vehicle=$c('planVehicle')?.val
 function startEdit(id){const r=recs().find(x=>x.id===id);if(!r)return;selected=r.vehicle_id;mode=['itv','seguro','taller','neumaticos','averia','otro'].includes(r.kind)?r.kind:'otro';editRecord=id;render();const drawer=$c('carPlannerDrawer');if(drawer)drawer.open=true;(drawer||$c('carPlanner'))?.scrollIntoView({behavior:'smooth',block:'start'})}
 async function deleteRecord(id){const r=recs().find(x=>x.id===id);if(!confirm(`¿Eliminar ${r?.title||'este registro'}? Esta acción no se puede deshacer.`))return;try{await rpc('family_delete_vehicle_record',{p_code:CODE,p_id:id});if(editRecord===id)editRecord=null;await load();render()}catch(e){console.error(e);alert('No se ha podido borrar.') }}
 
-make();window.familyCarsRender=()=>{const active=document.activeElement;if(active&&$c('cars')?.contains(active)&&/^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName))return;render()};
+make();
+window.familyCarsRender=()=>{const active=document.activeElement;if(active&&$c('cars')?.contains(active)&&/^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName))return;render()};
+window.familyCarsEditRecord=id=>{document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id==='cars'));document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('on',x.dataset.v==='cars'));startEdit(id)};
+window.familyCarsDeleteRecord=async id=>{await deleteRecord(id)};
 })();
