@@ -1,106 +1,88 @@
-name: Integrate app enhancements
+name: Validate app stability
 
 on:
   push:
+    branches:
+      - main
+      - 'stabilization/**'
+  pull_request:
     branches: [main]
-    paths:
-      - 'app-enhancements.js'
-      - 'calendar-races-update.js'
-      - 'packing.js'
-      - 'navigation-fix.js'
-      - 'home-dashboard.js'
-      - 'home-upcoming-races.js'
-      - 'packing-smart.js'
-      - 'smart-features.js'
-      - 'weekly-auto.js'
-      - 'notification-fix.js'
-      - 'family-upgrades.js'
-      - 'family-upgrades-fix.js'
-      - 'family-inbox.js'
-      - 'service-worker.js'
-      - 'cars-fallback.js'
-      - 'cars-v2.js'
-      - '.github/workflows/integrate-enhancements.yml'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  integrate:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Normalize cars source
+
+      - name: Check JavaScript syntax
         shell: bash
         run: |
-          python - <<'PY'
-          from pathlib import Path
-          p=Path('cars-fallback.js')
-          s=p.read_text()
-          s=s.replace("</div>`}\n}\nfunction renderPlanner", "</div>`;\n}\nfunction renderPlanner")
-          p.write_text(s)
-          PY
-      - name: Check cars JavaScript
-        run: node --check cars-fallback.js
-      - name: Integrate enhancements in index
-        shell: bash
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          import re
-          VERSION='2026.09.19.7'
-          p=Path('index.html')
-          s=p.read_text()
-          s=re.sub(r"const APP_VERSION='[^']+';", f"const APP_VERSION='{VERSION}';", s)
-
-          # Coches forma parte de la navegación y del HTML base.
-          s=s.replace("['health','Salud'],['races','Carreras']", "['health','Salud'],['cars','Coches'],['races','Carreras']")
-          if '<section id="cars" class="view">' not in s:
-              cars_section='''<section id="cars" class="view"><div class="ey">ITV · seguro · taller</div><div class="title">🚗 Coches</div><div class="card pad"><div class="meta">Cargando datos de coches…</div></div></section>\n'''
-              s=s.replace('<section id="sports" class="view">', cars_section+'<section id="sports" class="view">')
-
-          # El estado principal D es una variable global lexical, no window.D.
-          s=s.replace("D={events:[],shopping:[],recurring:[],members:[],school_calendar:[],vehicles:[],vehicle_records:[]}", "D={events:[],shopping:[],recurring:[],members:[],school_calendar:[],vehicles:[],vehicle_records:[],tasks:[],inbox:[]}")
-
-          for script in ['app-enhancements.js','calendar-races-update.js','packing.js','navigation-fix.js','home-dashboard.js','home-upcoming-races.js','packing-smart.js','smart-features.js','weekly-auto.js','notification-fix.js','family-upgrades.js','family-upgrades-fix.js','cars-fallback.js','cars-v2.js','family-inbox.js']:
-              pat=rf'<script src="{re.escape(script)}\?v=[^"]+"></script>'
-              tag=f'<script src="{script}?v={VERSION}"></script>'
-              s=re.sub(pat,tag,s)
-              if tag not in s:
-                  s=s.replace('</body>',tag+'</body>')
-          p.write_text(s)
-
-          sw=Path('service-worker.js')
-          if sw.exists():
-              x=sw.read_text()
-              x=re.sub(r"const APP_PATCH_VERSION='[^']+';", f"const APP_PATCH_VERSION='{VERSION}';", x)
-              if "'family-inbox.js'" not in x:
-                  x=x.replace("'cars-fallback.js']", "'cars-fallback.js','family-inbox.js']")
-              sw.write_text(x)
-
-          c=Path('cars-fallback.js')
-          if c.exists():
-              js=c.read_text()
-              js=js.replace("Array.isArray(window.D?.vehicles)?D.vehicles:[]", "Array.isArray(D?.vehicles)?D.vehicles:[]")
-              js=js.replace("Array.isArray(window.D?.vehicle_records)?D.vehicle_records:[]", "Array.isArray(D?.vehicle_records)?D.vehicle_records:[]")
-              c.write_text(js)
-
-          Path('version.json').write_text('{"version":"'+VERSION+'"}\n')
-          PY
-      - name: Commit integrated page
-        shell: bash
-        run: |
-          if git diff --quiet; then exit 0; fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html version.json cars-fallback.js service-worker.js
-          git commit -m "Publish app version ${GITHUB_SHA::7}"
-          for i in 1 2 3 4; do
-            git fetch origin main
-            git rebase origin/main || { git rebase --abort; exit 1; }
-            if git push origin main; then exit 0; fi
-            sleep 2
+          set -euo pipefail
+          for file in ./*.js; do
+            echo "Checking $file"
+            node --check "$file"
           done
-          exit 1
+
+      - name: Check stable architecture
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json, re, sys
+
+          errors=[]
+          index=Path('index.html').read_text()
+          sw=Path('service-worker.js').read_text()
+          nav=Path('navigation-fix.js').read_text()
+          tasks=Path('tasks.js').read_text()
+          sync=Path('sync-fix.js').read_text()
+          upgrades=Path('family-upgrades.js').read_text()
+          upgrades_fix=Path('family-upgrades-fix.js').read_text()
+          priority=Path('section-priority-fix.js').read_text()
+          notifications=Path('notification-fix.js').read_text()
+
+          scripts=re.findall(r'<script src="([^"]+)"',index)
+          names=[x.split('?')[0] for x in scripts]
+          for required in ['tasks.js','sync-fix.js','cars-v2.js','section-priority-fix.js']:
+              if names.count(required)!=1:
+                  errors.append(f'{required} must be loaded exactly once; found {names.count(required)}')
+          if 'cars-fallback.js' in names:
+              errors.append('cars-fallback.js is legacy and must not be loaded')
+          if len(names)!=len(set(names)):
+              errors.append('duplicate script tags found in index.html')
+
+          forbidden=[
+              ('navigation-fix.js',nav,"createElement('script')",'dynamic legacy script loading'),
+              ('family-upgrades.js',upgrades,'ensureCars(','duplicate cars module'),
+              ('family-upgrades-fix.js',upgrades_fix,'syncCars(','legacy cars enhancer'),
+              ('tasks.js',tasks,'setInterval(sync','task polling'),
+              ('section-priority-fix.js',priority,'setInterval(enhancePrioritySections','layout polling'),
+              ('notification-fix.js',notifications,'setInterval(()=>nfRefresh','notification polling'),
+              ('service-worker.js',sw,'client.navigate(','forced live reload'),
+              ('service-worker.js',sw,'const scripts=','service worker script injection'),
+          ]
+          for file,text,needle,label in forbidden:
+              if needle in text:
+                  errors.append(f'{file}: forbidden {label}')
+
+          if re.search(r"visibilitychange[^\n]{0,200}load\(\)",index):
+              errors.append('index.html must not full-load data on visibilitychange')
+          if re.search(r"setInterval\([^\n]{0,200}load\(\)",index):
+              errors.append('index.html must not full-load data on a timer')
+
+          version=json.loads(Path('version.json').read_text())['version']
+          m=re.search(r"const APP_VERSION='([^']+)'",index)
+          s=re.search(r"const APP_PATCH_VERSION='([^']+)'",sw)
+          if not m or m.group(1)!=version:
+              errors.append(f'index APP_VERSION does not match version.json ({version})')
+          if not s or s.group(1)!=version:
+              errors.append(f'service worker version does not match version.json ({version})')
+
+          if errors:
+              print('\n'.join('ERROR: '+e for e in errors))
+              sys.exit(1)
+          print('Stable architecture checks passed.')
+          PY
