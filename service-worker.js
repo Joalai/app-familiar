@@ -1,4 +1,4 @@
-const APP_PATCH_VERSION='2026.09.19.3';
+const APP_PATCH_VERSION='2026.09.19.4';
 
 self.addEventListener('install',()=>self.skipWaiting());
 self.addEventListener('activate',event=>event.waitUntil((async()=>{
@@ -20,7 +20,7 @@ self.addEventListener('fetch',event=>{
       let html=await response.text();
       html=html.replace(/const APP_VERSION='[^']+';/,"const APP_VERSION='"+APP_PATCH_VERSION+"';");
       html=html.replace(/(\.js\?v=)[^"'&<]+/g,'$1'+APP_PATCH_VERSION);
-      const scripts=['app-enhancements.js','calendar-races-update.js','packing.js','navigation-fix.js','home-dashboard.js','home-upcoming-races.js','packing-smart.js','smart-features.js','weekly-auto.js','notification-fix.js','family-upgrades.js','family-upgrades-fix.js','section-priority-fix.js','tasks.js','sync-fix.js','cars-fallback.js','family-inbox.js'];
+      const scripts=['app-enhancements.js','calendar-races-update.js','packing.js','navigation-fix.js','home-dashboard.js','home-upcoming-races.js','packing-smart.js','smart-features.js','weekly-auto.js','notification-fix.js','family-upgrades.js','family-upgrades-fix.js','section-priority-fix.js','tasks.js','sync-fix.js','cars-fallback.js','cars-v2.js','family-inbox.js'];
       for(const script of scripts){
         if(!html.includes(script))html=html.replace('</body>','<script src="'+script+'?v='+APP_PATCH_VERSION+'"></script></body>');
       }
