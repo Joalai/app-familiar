@@ -113,167 +113,18 @@ function enhanceHealthLayout(){
   if(tools.firstElementChild!==listCard)tools.insertBefore(listCard,drawer);
 }
 
-function closeEdit(){const d=q('carEditDrawer');if(!d)return;d.open=false;d.hidden=true;if(q('carEditMsg'))q('carEditMsg').textContent=''}
-function closeAdd(clear=false){const d=q('carVehicleDrawer');if(!d)return;d.open=false;d.hidden=true;if(clear){if(q('carName'))q('carName').value='';if(q('carReg'))q('carReg').value='';if(q('carNotes'))q('carNotes').value='';if(q('carMsg'))q('carMsg').textContent=''}}
 
-function goHome(){
-  try{
-    if(typeof window.familySafeOpen==='function'){window.familySafeOpen('home');return}
-    if(typeof show==='function'){show('home');return}
-  }catch(e){}
-  const home=document.querySelector('#nav button[data-v="home"]');
-  if(home)home.click();
+function refreshHealthStable(){
+  try{enhanceHealthLayout();installHealthRendering()}catch(e){console.error('Salud',e)}
 }
-
-function ensureHomeNav(){
-  const section=q('cars');if(!section)return;
-  let title=section.querySelector(':scope > .title');
-  let row=q('carTopRow');
-  if(!row){
-    row=document.createElement('div');row.id='carTopRow';row.className='carTopRow';
-    const ey=section.querySelector(':scope > .ey');
-    if(title){title.parentNode.insertBefore(row,title);row.appendChild(title)}
-    else if(ey)ey.insertAdjacentElement('afterend',row);
-    const home=document.createElement('button');home.id='carHomeBtn';home.className='carHomeBtn';home.type='button';home.textContent='← Inicio';home.onclick=goHome;row.appendChild(home);
-  }else{
-    title=section.querySelector(':scope > .title');
-    if(title)row.insertBefore(title,row.firstChild);
-  }
-}
-
-function ensureEditDrawer(){
-  const cards=q('carsCards');
-  if(!cards)return null;
-  let drawer=q('carEditDrawer');
-  if(drawer)return drawer;
-  drawer=document.createElement('details');
-  drawer.id='carEditDrawer';drawer.className='formDrawer';drawer.hidden=true;
-  drawer.innerHTML=`<summary>Editar coche</summary><div class="card pad"><div class="form">
-    <div class="field"><label>Nombre</label><input id="carEditName" placeholder="Ej. Volkswagen Golf"></div>
-    <div class="field"><label>Matrícula</label><input id="carEditReg"></div>
-    <div class="field"><label>Notas</label><textarea id="carEditNotes"></textarea></div>
-    <div class="formactions"><button id="carEditSave" class="primary" type="button">Guardar cambios</button><button id="carEditCancel" class="secondary" type="button">Cancelar</button></div>
-    <button id="carDelete" class="secondary danger" type="button">Eliminar coche</button>
-    <div id="carEditMsg" class="meta"></div>
-  </div></div>`;
-  cards.insertAdjacentElement('afterend',drawer);
-  q('carEditSave').onclick=saveVehicle;
-  q('carEditCancel').onclick=closeEdit;
-  q('carDelete').onclick=deleteVehicle;
-  return drawer;
-}
-
-function ensureAddDrawer(){
-  const drawer=q('carVehicleDrawer');
-  if(!drawer)return null;
-  if(!drawer.dataset.compact){
-    drawer.dataset.compact='1';
-    drawer.hidden=true;
-    const save=q('carSave');
-    if(save&&!q('carAddCancel')){
-      const actions=document.createElement('div');actions.className='formactions';
-      save.parentNode.insertBefore(actions,save);actions.appendChild(save);
-      const cancel=document.createElement('button');cancel.id='carAddCancel';cancel.type='button';cancel.className='secondary';cancel.textContent='Cancelar';actions.appendChild(cancel);
-      cancel.onclick=()=>closeAdd(true);
-    }
-  }
-  return drawer;
-}
-
-function ensurePlannerDrawer(){
-  const planner=q('carPlanner');
-  if(!planner)return null;
-  if(planner.parentElement?.id==='carPlannerDrawer')return planner.parentElement;
-  const drawer=document.createElement('details');drawer.id='carPlannerDrawer';drawer.className='formDrawer';
-  drawer.innerHTML='<summary>ITV, seguro y mantenimiento <span>Programar</span></summary>';
-  planner.parentNode.insertBefore(drawer,planner);drawer.appendChild(planner);
-  return drawer;
-}
-
-function ensureActionBar(){
-  const cards=q('carsCards');if(!cards)return null;
-  let bar=q('carQuickActions');
-  if(!bar){
-    bar=document.createElement('div');bar.id='carQuickActions';bar.className='carQuickActions';
-    bar.innerHTML='<button type="button" id="carAddOpen">＋ Añadir coche</button>';
-    cards.insertAdjacentElement('afterend',bar);
-    q('carAddOpen').onclick=()=>{const d=ensureAddDrawer();if(!d)return;closeEdit();d.hidden=false;d.open=true;d.scrollIntoView({behavior:'smooth',block:'nearest'})};
-  }
-  return bar;
-}
-
-function enhanceCards(){
-  installStyles();
-  const grid=q('carsCards');if(!grid)return;
-  ensureHomeNav();
-  q('carVehicleEditTools')?.remove();
-  const drawer=ensureEditDrawer();if(drawer&&!drawer.open)drawer.hidden=true;
-  ensureAddDrawer();ensurePlannerDrawer();const bar=ensureActionBar();
-
-  [...grid.querySelectorAll('.carVehicleCard[data-pick]')].forEach(card=>{
-    if(card.parentElement?.classList.contains('carVehicleShell'))return;
-    const id=card.dataset.pick,shell=document.createElement('div');shell.className='carVehicleShell';
-    card.parentNode.insertBefore(shell,card);shell.appendChild(card);
-    const edit=document.createElement('button');edit.type='button';edit.className='carInlineEdit';edit.dataset.editVehicle=id;edit.textContent='Editar';shell.appendChild(edit);
-  });
-
-  const section=q('cars'),title=section?.querySelector('.title'),upcoming=q('carUpcoming');
-  const directLabel=section?[...section.children].find(x=>x.classList?.contains('carSectionLabel')):null;
-  const edit=q('carEditDrawer'),add=q('carVehicleDrawer'),planner=q('carPlannerDrawer'),history=q('carHistoryDrawer');
-  const placeAfter=(anchor,node)=>{if(anchor&&node&&anchor.nextElementSibling!==node)anchor.insertAdjacentElement('afterend',node)};
-  if(section&&title&&directLabel&&grid&&bar&&upcoming){
-    directLabel.textContent='Tus coches';
-    const topRow=q('carTopRow');
-    placeAfter(topRow||title,directLabel);
-    placeAfter(directLabel,grid);
-    placeAfter(grid,bar);
-    placeAfter(bar,edit);
-    placeAfter(edit,add);
-    placeAfter(add,upcoming);
-    if(planner)placeAfter(upcoming,planner);
-    if(history)placeAfter(planner||upcoming,history);
-    const ey=section.querySelector(':scope > .ey');if(ey)ey.textContent='Vehículos de la familia';
-  }
-}
-
-function openVehicle(id){
-  const v=vehicles().find(x=>x.id===id),drawer=ensureEditDrawer();if(!v||!drawer)return;
-  closeAdd(false);drawer.dataset.vehicleId=v.id;
-  q('carEditName').value=v.name||'';q('carEditReg').value=v.registration||'';q('carEditNotes').value=v.notes||'';q('carEditMsg').textContent='';
-  drawer.hidden=false;drawer.open=true;drawer.scrollIntoView({behavior:'smooth',block:'nearest'});
-}
-
-async function saveVehicle(){
-  const drawer=q('carEditDrawer'),msg=q('carEditMsg'),button=q('carEditSave'),id=drawer?.dataset.vehicleId,name=q('carEditName')?.value.trim();
-  if(!id)return;if(!name){msg.textContent='Escribe un nombre para el coche.';return}
-  button.disabled=true;msg.textContent='Guardando…';
-  try{
-    await rpc('family_update_vehicle',{p_code:CODE,p_id:id,p_name:name,p_registration:q('carEditReg').value.trim()||null,p_notes:q('carEditNotes').value.trim()||null});
-    closeEdit();await load();lastSignature='';if(typeof window.familyCarsRender==='function')window.familyCarsRender();setTimeout(enhanceCards,0);
-  }catch(e){console.error(e);msg.textContent='No se han podido guardar los cambios.'}finally{button.disabled=false}
-}
-
-async function deleteVehicle(){
-  const drawer=q('carEditDrawer'),id=drawer?.dataset.vehicleId,v=vehicles().find(x=>x.id===id);if(!v)return;
-  if(!confirm(`¿Eliminar ${v.name||'este coche'}? También se borrará su historial de ITV, seguro y taller. Esta acción no se puede deshacer.`))return;
-  const button=q('carDelete'),msg=q('carEditMsg');button.disabled=true;msg.textContent='Eliminando…';
-  try{
-    await rpc('family_delete_vehicle',{p_code:CODE,p_id:id});closeEdit();await load();lastSignature='';if(typeof window.familyCarsRender==='function')window.familyCarsRender();setTimeout(enhanceCards,0);
-  }catch(e){console.error(e);msg.textContent='No se ha podido eliminar el coche.'}finally{button.disabled=false}
-}
-
-function syncCars(force=false){
-  if(!q('carsCards'))return;
-  const sig=dataSignature(),count=vehicles().length;
-  if(lastVehicleCount>=0&&count>lastVehicleCount)closeAdd(true);
-  lastVehicleCount=count;
-  if(force||sig!==lastSignature){lastSignature=sig;if(typeof window.familyCarsRender==='function')window.familyCarsRender();setTimeout(enhanceCards,0)}else enhanceCards();
-}
-
 document.addEventListener('click',e=>{
-  if(e.target.closest?.('#nav button[data-v="health"]'))setTimeout(()=>{enhanceHealthLayout();installHealthRendering()},0);
+  if(e.target.closest?.('#nav button[data-v="health"]'))setTimeout(refreshHealthStable,0);
 });
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(()=>{enhanceHealthLayout();installHealthRendering()},100)});
-setTimeout(()=>{enhanceHealthLayout();installHealthRendering()},150);
-setInterval(()=>{enhanceHealthLayout()},1500);
+document.addEventListener('family-data-synced',()=>{
+  if(q('health')?.classList.contains('on'))setTimeout(refreshHealthStable,0);
+});
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'&&q('health')?.classList.contains('on'))setTimeout(refreshHealthStable,80);
+});
+setTimeout(refreshHealthStable,150);
 })();
