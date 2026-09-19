@@ -54,6 +54,17 @@ jobs:
           if len(names)!=len(set(names)):
               errors.append('duplicate script tags found in index.html')
 
+          version=json.loads(Path('version.json').read_text())['version']
+          for src in scripts:
+              if src.startswith('http://') or src.startswith('https://'):
+                  continue
+              name=src.split('?')[0]
+              if not Path(name).exists():
+                  errors.append(f'missing script file referenced by index.html: {name}')
+              q=re.search(r'[?&]v=([^&]+)',src)
+              if not q or q.group(1)!=version:
+                  errors.append(f'{name} is not pinned to current version {version}')
+
           forbidden=[
               ('navigation-fix.js',nav,"createElement('script')",'dynamic legacy script loading'),
               ('family-upgrades.js',upgrades,'ensureCars(','duplicate cars module'),
@@ -73,7 +84,6 @@ jobs:
           if "setInterval(()=>{if(CODE&&document.visibilityState==='visible')load()}" in index:
               errors.append('index.html must not full-load data on a timer')
 
-          version=json.loads(Path('version.json').read_text())['version']
           m=re.search(r"const APP_VERSION='([^']+)'",index)
           s=re.search(r"const APP_PATCH_VERSION='([^']+)'",sw)
           if not m or m.group(1)!=version:
