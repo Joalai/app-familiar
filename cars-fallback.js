@@ -60,5 +60,5 @@ async function savePlan(){const msg=$c('planMsg'),vehicle=$c('planVehicle')?.val
 function startEdit(id){const r=recs().find(x=>x.id===id);if(!r)return;selected=r.vehicle_id;mode=['itv','seguro','taller','neumaticos','averia'].includes(r.kind)?r.kind:'taller';editRecord=id;render();$c('carPlanner')?.scrollIntoView({behavior:'smooth',block:'start'})}
 async function deleteRecord(id){if(!confirm('¿Borrar este registro del coche?'))return;try{await rpc('family_delete_vehicle_record',{p_code:CODE,p_id:id});if(editRecord===id)editRecord=null;await load();render()}catch(e){console.error(e);alert('No se ha podido borrar.') }}
 
-make();window.familyCarsRender=render;
+make();window.familyCarsRender=()=>{const active=document.activeElement;if(active&&$c('cars')?.contains(active)&&/^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName))return;render()};
 })();
