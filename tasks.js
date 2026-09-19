@@ -105,4 +105,5 @@ function sync(){makeSection();const sig=signature();if(sig!==lastSig){lastSig=si
 
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(sync,100)});
 setTimeout(sync,250);setInterval(sync,1800);
+window.familyTasksRender=sync;
 })();
