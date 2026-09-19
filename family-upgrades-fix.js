@@ -271,11 +271,9 @@ function syncCars(force=false){
 }
 
 document.addEventListener('click',e=>{
-  const edit=e.target.closest?.('[data-edit-vehicle]');if(edit){e.preventDefault();e.stopPropagation();openVehicle(edit.dataset.editVehicle);return}
-  if(e.target.closest?.('#nav button[data-v="cars"]'))setTimeout(()=>syncCars(true),0);
   if(e.target.closest?.('#nav button[data-v="health"]'))setTimeout(()=>{enhanceHealthLayout();installHealthRendering()},0);
-  if(e.target.closest?.('#carsCards .carVehicleCard'))setTimeout(enhanceCards,0);
 });
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){setTimeout(()=>syncCars(true),100);setTimeout(()=>{enhanceHealthLayout();installHealthRendering()},100)}});
-setTimeout(()=>{syncCars(true);enhanceHealthLayout();installHealthRendering()},150);setInterval(()=>{syncCars(false);enhanceHealthLayout()},1500);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(()=>{enhanceHealthLayout();installHealthRendering()},100)});
+setTimeout(()=>{enhanceHealthLayout();installHealthRendering()},150);
+setInterval(()=>{enhanceHealthLayout()},1500);
 })();
