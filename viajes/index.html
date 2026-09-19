@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#8f1d14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="China 2027">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="../assets/app-icon-192.png">
+<link rel="stylesheet" href="styles.css?v=0.1.0">
+<title>China 2027</title>
+</head>
+<body>
+<div id="login" class="login hidden">
+  <div class="loginbox">
+    <div class="seal">中</div>
+    <div class="kicker">Viajes · Familia</div>
+    <h1>China 2027</h1>
+    <p>Usa el mismo código de la App Familiar.</p>
+    <input id="codeInput" inputmode="text" autocomplete="off" placeholder="Código familiar">
+    <button id="loginBtn" class="primary">Entrar</button>
+    <div id="loginMsg" class="error"></div>
+  </div>
+</div>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="seal small">中</div>
+      <div>
+        <div class="kicker">VIAJE FAMILIAR</div>
+        <strong id="brandTitle">CHINA 2027</strong>
+      </div>
+    </div>
+    <div class="topright">
+      <span id="syncPill" class="pill neutral">Cargando…</span>
+      <button id="userBtn" class="avatar" type="button">👤</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="home" class="view on">
+      <div class="hero">
+        <div>
+          <div class="kicker light">SEMANA SANTA 2027</div>
+          <h1>CHINA</h1>
+          <div id="dateRange" class="heroDates"></div>
+        </div>
+        <div class="countdownBox">
+          <b id="countdown">—</b>
+          <span id="countdownLabel">días</span>
+        </div>
+      </div>
+
+      <div class="sectionTitle">
+        <div><div class="kicker">ASISTENTE OPERATIVO</div><h2>Ahora / Lo siguiente</h2></div>
+      </div>
+      <div id="nowNext" class="nowNext"></div>
+
+      <div class="sectionTitle"><h2>Acceso rápido</h2></div>
+      <div class="quickGrid">
+        <button data-open="itinerary"><span>🗓️</span><b>Itinerario</b><small>Día a día</small></button>
+        <button data-open="bookings" data-filter="transport"><span>🚄</span><b>Transportes</b><small>Vuelos, trenes y transfers</small></button>
+        <button data-open="bookings" data-filter="accommodation"><span>🏨</span><b>Alojamientos</b><small>7 bases · 14 noches</small></button>
+        <button data-open="bookings" data-filter="reservation"><span>🎟️</span><b>Entradas</b><small>Cupos y ventanas</small></button>
+        <button data-open="budget"><span>€</span><b>Presupuesto</b><small>Estimado / reservado / pagado</small></button>
+        <button data-open="more"><span>🧰</span><b>Más</b><small>Documentos e información útil</small></button>
+      </div>
+
+      <div class="sectionTitle">
+        <div><div class="kicker">ANTES DEL VIAJE</div><h2>Pendientes prioritarios</h2></div>
+      </div>
+      <div id="priorityTasks"></div>
+    </section>
+
+    <section id="itinerary" class="view">
+      <div class="pageHead"><div><div class="kicker">RUTA ACTUAL</div><h1>Itinerario</h1></div><span id="dayCount" class="pill"></span></div>
+      <div class="notice">La ruta está cargada como <b>planificada</b>. Solo los datos respaldados por reserva/mensaje aparecen como confirmados.</div>
+      <div id="days"></div>
+    </section>
+
+    <section id="bookings" class="view">
+      <div class="pageHead"><div><div class="kicker">RESERVAS</div><h1>Transportes, hoteles y entradas</h1></div></div>
+      <div id="bookingFilters" class="chips">
+        <button data-type="all" class="on">Todo</button>
+        <button data-type="transport">Transportes</button>
+        <button data-type="accommodation">Alojamientos</button>
+        <button data-type="reservation">Entradas</button>
+        <button data-type="document">Documentos</button>
+      </div>
+      <div id="records"></div>
+    </section>
+
+    <section id="budget" class="view">
+      <div class="pageHead"><div><div class="kicker">CONTROL</div><h1>Presupuesto</h1></div></div>
+      <div id="budgetSummary" class="metricGrid"></div>
+      <div class="notice">Las cifras iniciales son <b>estimaciones orientativas</b> de la guía v4. Se sustituirán por importes reales al reservar.</div>
+      <div id="budgetRows"></div>
+    </section>
+
+    <section id="more" class="view">
+      <div class="pageHead"><div><div class="kicker">VIAJE</div><h1>Más</h1></div></div>
+      <div class="menuList">
+        <button data-open="bookings" data-filter="document"><span>📄</span><div><b>Documentación del viaje</b><small>Seguro, visado/exención y documentos específicos</small></div><em>›</em></button>
+        <button id="packingBtn"><span>🧳</span><div><b>Maletas</b><small>Reutilizar la lógica de la App Familiar</small></div><em>›</em></button>
+        <button disabled><span>🗺️</span><div><b>Mapa</b><small>Se activará al cerrar hoteles y puntos concretos</small></div><em>Próx.</em></button>
+        <button disabled><span>🍜</span><div><b>Restaurantes</b><small>Solo lugares realmente utilizables</small></div><em>Próx.</em></button>
+        <button disabled><span>📶</span><div><b>Información útil</b><small>Pagos, conectividad, apps, idioma y emergencias</small></div><em>Próx.</em></button>
+      </div>
+
+      <div class="card">
+        <div class="kicker">VIAJEROS</div>
+        <div id="people" class="people"></div>
+      </div>
+      <div class="card">
+        <div class="kicker">ESTADO DE ESTA PRIMERA VERSIÓN</div>
+        <p><b>Motor reutilizable + datos China separados.</b> La app ya lee datos compartidos de Supabase, conserva una copia offline y permite actualizar estados de reserva.</p>
+        <p class="muted">La edición completa de fichas, mapa, documentos, restaurantes y sincronización automática con Tareas/Lo que viene se incorporará por fases.</p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottomNav" aria-label="Navegación">
+    <button data-nav="home" class="on"><span>⌂</span><small>Inicio</small></button>
+    <button data-nav="itinerary"><span>🗓️</span><small>Itinerario</small></button>
+    <button data-nav="bookings"><span>✓</span><small>Reservas</small></button>
+    <button data-nav="budget"><span>€</span><small>Gastos</small></button>
+    <button data-nav="more"><span>•••</span><small>Más</small></button>
+  </nav>
+</div>
+
+<script src="app.js?v=0.1.0"></script>
+</body>
+</html>
