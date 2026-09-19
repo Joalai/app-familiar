@@ -19,6 +19,7 @@ on:
       - 'family-inbox.js'
       - 'service-worker.js'
       - 'cars-fallback.js'
+      - 'cars-v2.js'
       - '.github/workflows/integrate-enhancements.yml'
 
 permissions:
@@ -49,7 +50,7 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           import re
-          VERSION='2026.09.19.3'
+          VERSION='2026.09.19.4'
           p=Path('index.html')
           s=p.read_text()
           s=re.sub(r"const APP_VERSION='[^']+';", f"const APP_VERSION='{VERSION}';", s)
@@ -63,7 +64,7 @@ jobs:
           # El estado principal D es una variable global lexical, no window.D.
           s=s.replace("D={events:[],shopping:[],recurring:[],members:[],school_calendar:[],vehicles:[],vehicle_records:[]}", "D={events:[],shopping:[],recurring:[],members:[],school_calendar:[],vehicles:[],vehicle_records:[],tasks:[],inbox:[]}")
 
-          for script in ['app-enhancements.js','calendar-races-update.js','packing.js','navigation-fix.js','home-dashboard.js','home-upcoming-races.js','packing-smart.js','smart-features.js','weekly-auto.js','notification-fix.js','family-upgrades.js','family-upgrades-fix.js','cars-fallback.js','family-inbox.js']:
+          for script in ['app-enhancements.js','calendar-races-update.js','packing.js','navigation-fix.js','home-dashboard.js','home-upcoming-races.js','packing-smart.js','smart-features.js','weekly-auto.js','notification-fix.js','family-upgrades.js','family-upgrades-fix.js','cars-fallback.js','cars-v2.js','family-inbox.js']:
               pat=rf'<script src="{re.escape(script)}\?v=[^"]+"></script>'
               tag=f'<script src="{script}?v={VERSION}"></script>'
               s=re.sub(pat,tag,s)
