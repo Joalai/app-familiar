@@ -220,17 +220,18 @@ function enhanceCards(){
   const section=q('cars'),title=section?.querySelector('.title'),upcoming=q('carUpcoming');
   const directLabel=section?[...section.children].find(x=>x.classList?.contains('carSectionLabel')):null;
   const edit=q('carEditDrawer'),add=q('carVehicleDrawer'),planner=q('carPlannerDrawer'),history=q('carHistoryDrawer');
+  const placeAfter=(anchor,node)=>{if(anchor&&node&&anchor.nextElementSibling!==node)anchor.insertAdjacentElement('afterend',node)};
   if(section&&title&&directLabel&&grid&&bar&&upcoming){
     directLabel.textContent='Tus coches';
     const topRow=q('carTopRow');
-    (topRow||title).insertAdjacentElement('afterend',directLabel);
-    directLabel.insertAdjacentElement('afterend',grid);
-    grid.insertAdjacentElement('afterend',bar);
-    bar.insertAdjacentElement('afterend',edit);
-    edit.insertAdjacentElement('afterend',add);
-    add.insertAdjacentElement('afterend',upcoming);
-    if(planner)upcoming.insertAdjacentElement('afterend',planner);
-    if(history)(planner||upcoming).insertAdjacentElement('afterend',history);
+    placeAfter(topRow||title,directLabel);
+    placeAfter(directLabel,grid);
+    placeAfter(grid,bar);
+    placeAfter(bar,edit);
+    placeAfter(edit,add);
+    placeAfter(add,upcoming);
+    if(planner)placeAfter(upcoming,planner);
+    if(history)placeAfter(planner||upcoming,history);
     const ey=section.querySelector(':scope > .ey');if(ey)ey.textContent='Vehículos de la familia';
   }
 }
