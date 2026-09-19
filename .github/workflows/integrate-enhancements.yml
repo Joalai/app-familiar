@@ -46,7 +46,7 @@ jobs:
 
           scripts=re.findall(r'<script src="([^"]+)"',index)
           names=[x.split('?')[0] for x in scripts]
-          for required in ['tasks.js','sync-fix.js','cars-v2.js','section-priority-fix.js']:
+          for required in ['tasks.js','sync-fix.js','cars-v2.js','section-priority-fix.js','stability-core.js']:
               if names.count(required)!=1:
                   errors.append(f'{required} must be loaded exactly once; found {names.count(required)}')
           if 'cars-fallback.js' in names:
