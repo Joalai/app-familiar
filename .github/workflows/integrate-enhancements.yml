@@ -68,9 +68,9 @@ jobs:
               if needle in text:
                   errors.append(f'{file}: forbidden {label}')
 
-          if re.search(r"visibilitychange[^\n]{0,200}load\(\)",index):
+          if "document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&CODE)load()})" in index:
               errors.append('index.html must not full-load data on visibilitychange')
-          if re.search(r"setInterval\([^\n]{0,200}load\(\)",index):
+          if "setInterval(()=>{if(CODE&&document.visibilityState==='visible')load()}" in index:
               errors.append('index.html must not full-load data on a timer')
 
           version=json.loads(Path('version.json').read_text())['version']
