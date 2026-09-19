@@ -1,53 +1,6 @@
 (()=>{
 'use strict';
-
-const unsavedIds=['sn','sd','pn','pd','ph','pe','pp','pnotes','hn','hd','hh','he','hp','hnotes','rn','rst','ren','rfrom','runtil','rplace','docNumber','docExpiry'];
-const carIds=['cvName','cvReg','cvNotes','crNext','crReminder','crTitle','crProvider','crMileage','crAmount','crNotes','carName','carReg','carNotes','carEditName','carEditReg','carEditNotes'];
-hasUnsaved=()=>unsavedIds.some(id=>document.getElementById(id)?.value?.trim())||carIds.some(id=>document.getElementById(id)?.value?.trim())||Boolean(document.getElementById('carRecordDrawer')?.open&&document.getElementById('crDate')?.value);
-
 const q=id=>document.getElementById(id);
-let lastSignature='',lastVehicleCount=-1;
-
-function vehicles(){return Array.isArray(D?.vehicles)?D.vehicles:[]}
-function records(){return Array.isArray(D?.vehicle_records)?D.vehicle_records:[]}
-function dataSignature(){return JSON.stringify({v:vehicles().map(x=>[x.id,x.name,x.registration,x.notes,x.updated_at]),r:records().map(x=>[x.id,x.vehicle_id,x.kind,x.next_date,x.reminder_date,x.updated_at])})}
-
-function installStyles(){
-  if(q('carEditFixStyles'))return;
-  const style=document.createElement('style');
-  style.id='carEditFixStyles';
-  style.textContent=`
-#cars .carTopRow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 8px}
-#cars .carTopRow .title{margin:2px 0 0}
-#cars .carHomeBtn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 11px;font-weight:850;color:#2563eb;white-space:nowrap}
-#cars .carHomeBtn:active{background:#eff6ff}
-#cars .carVehicleGrid{margin:8px 0!important}
-#cars .carVehicleShell{position:relative;min-width:0}
-#cars .carVehicleShell .carVehicleCard{width:100%;margin:0;padding-right:82px;min-height:126px}
-#cars .carInlineEdit{position:absolute;right:10px;top:10px;border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 9px;font-weight:850;color:#2563eb;font-size:12px;z-index:2}
-#cars .carInlineEdit:active{background:#eff6ff}
-#cars .carQuickActions{display:flex;justify-content:flex-end;gap:7px;margin:6px 0 14px}
-#cars .carQuickActions button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 11px;font-weight:850;color:#2563eb}
-#cars #carEditDrawer,#cars #carVehicleDrawer{margin:0 0 12px}
-#cars #carEditDrawer>summary,#cars #carVehicleDrawer>summary{display:none}
-#cars #carEditDrawer[hidden],#cars #carVehicleDrawer[hidden]{display:none!important}
-#cars #carPlannerDrawer{margin:10px 0 0}
-#cars #carPlannerDrawer>summary{padding:12px 14px}
-#cars #carHistoryDrawer{margin-top:8px!important}
-#cars .carSectionLabel{margin-top:8px}
-#cars .carFutureHero{margin-top:4px}
-@media(max-width:700px){
- #cars .carTopRow{margin-bottom:6px}
- #cars .carHomeBtn{padding:7px 9px;font-size:12px}
- #cars .carVehicleGrid{grid-template-columns:1fr!important}
- #cars .carVehicleShell .carVehicleCard{padding-right:74px;min-height:118px}
- #cars .carInlineEdit{right:8px;top:8px;padding:7px 8px}
- #cars .carQuickActions{margin-bottom:10px}
-}
-`;
-  document.head.appendChild(style);
-}
-
 function installHealthStyles(){
   if(q('healthLayoutStyles'))return;
   const style=document.createElement('style');
