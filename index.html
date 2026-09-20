@@ -75,7 +75,8 @@
 <script>
 const SUPA='https://gjplhfinujyhjxpahcak.supabase.co';
 const KEY='sb_publishable_8WLfOB17Uhnyd9jNWFdyDA_ewE7yxVO';
-const APP_VERSION='2026.09.20.2';
+const APP_VERSION='2026.09.20.3';
+const APP_PRODUCTION_URL='https://joalai.github.io/app-familiar/';
 const FAMILY_USERS=['Igor','Mirari','Joane','Laia','Alain'];
 function canonicalUser(name){let value=String(name||'').trim().toLocaleLowerCase('es');return FAMILY_USERS.find(x=>x.toLocaleLowerCase('es')===value)||''}
 let CODE=localStorage.getItem('family_code')||'',USER=canonicalUser(localStorage.getItem('family_user')),D={events:[],shopping:[],recurring:[],members:[],school_calendar:[],vehicles:[],vehicle_records:[],tasks:[],inbox:[]},W=new Date(),M=new Date(),S=new Date(),C='Todos',MONTH_MODE=localStorage.getItem('family_month_mode')||(matchMedia('(max-width:700px)').matches?'agenda':'calendar'),EDIT_SHOP=null,EDIT_PLAN=null,EDIT_HEALTH=null,EDIT_ROUTINE=null,EDIT_DOC=null,DOCS=[],DOC_REVEALED=new Set(),CALENDAR_EVENT=null;
@@ -155,7 +156,7 @@ function renderDocuments(){let people=['Igor','Mirari','Joane','Laia','Alain'],g
 async function loadDocuments(){DOCS=await rpcAuth('family_list_documents');DOC_REVEALED.clear();$('docGate').classList.add('hidden');$('docApp').classList.remove('hidden');renderDocuments()}
 async function openDocuments(){docStatus('');$('docApp').classList.add('hidden');$('docGate').classList.remove('hidden');$('docLocked').classList.remove('hidden');$('docEnroll').classList.add('hidden');if(!AUTH){docStatus('No se ha podido cargar el acceso seguro. Comprueba la conexión.',true);return}try{let{data:{session}}=await AUTH.auth.getSession();if(!session)return;let status=await rpcAuth('family_document_access_status');if(status.authorized){await loadDocuments();return}$('docLocked').classList.add('hidden');$('docEnroll').classList.remove('hidden');docStatus('Termina la activación para '+(localStorage.getItem('family_doc_pending_adult')||'el adulto seleccionado')+'.')}catch(e){docStatus('No se ha podido comprobar el acceso seguro.',true)}}
 async function unlockDocuments(){let b=$('docUnlock');b.disabled=true;b.textContent='Esperando Face ID…';docStatus('');try{let{error}=await AUTH.auth.signInWithPasskey();if(error)throw error;let status=await rpcAuth('family_document_access_status');if(!status.authorized){await AUTH.auth.signOut();throw Error('Esta cuenta no está autorizada para Documentación.')}await loadDocuments()}catch(e){let msg=String(e.message||e);docStatus(msg.includes('passkey_disabled')?'Face ID todavía no está activado en Supabase.':msg.includes('cancel')||msg.includes('Abort')?'Se ha cancelado Face ID.':'No se ha podido desbloquear con Face ID.',true)}finally{b.disabled=false;b.textContent='Desbloquear con Face ID'}}
-async function sendDocumentLink(){let email=$('docEmail').value.trim().toLowerCase(),adult=$('docAdult').value,b=$('docSendLink');if(!email||!email.includes('@'))return docStatus('Introduce un email válido.',true);localStorage.setItem('family_doc_pending_adult',adult);b.disabled=true;b.textContent='Enviando…';docStatus('');try{let target=location.origin+location.pathname+'?documents=setup&adult='+encodeURIComponent(adult),{error}=await AUTH.auth.signInWithOtp({email,options:{emailRedirectTo:target,shouldCreateUser:true}});if(error)throw error;docStatus('Enlace enviado ✓ Revisa el email y ábrelo en este iPhone.')}catch(e){let msg=String(e?.message||e||'').toLowerCase();if(msg.includes('rate')||msg.includes('60'))docStatus('Supabase limita los envíos seguidos. Espera un minuto y vuelve a intentarlo.',true);else if(msg.includes('not authorized')||msg.includes('not authorised'))docStatus('Ese email no está autorizado por el servicio de envío de Supabase.',true);else if(msg.includes('redirect'))docStatus('La dirección de retorno de la app no está autorizada.',true);else{let accepted=false;try{accepted=!!(await rpc('family_document_link_recent',{p_code:CODE,p_email:email}))}catch(_){}if(accepted)docStatus('Enlace generado ✓ Supabase lo ha aceptado. Revisa el email y ábrelo en este iPhone.');else docStatus('No se ha podido confirmar el envío. Espera un minuto y vuelve a intentarlo.',true)}}finally{b.disabled=false;b.textContent='Enviar enlace de activación'}}
+async function sendDocumentLink(){let email=$('docEmail').value.trim().toLowerCase(),adult=$('docAdult').value,b=$('docSendLink');if(!email||!email.includes('@'))return docStatus('Introduce un email válido.',true);localStorage.setItem('family_doc_pending_adult',adult);b.disabled=true;b.textContent='Enviando…';docStatus('');try{let target=APP_PRODUCTION_URL+'?documents=setup&adult='+encodeURIComponent(adult),{error}=await AUTH.auth.signInWithOtp({email,options:{emailRedirectTo:target,shouldCreateUser:true}});if(error)throw error;docStatus('Enlace enviado ✓ Revisa el email y ábrelo en este iPhone.')}catch(e){let msg=String(e?.message||e||'').toLowerCase();if(msg.includes('rate')||msg.includes('60'))docStatus('Supabase limita los envíos seguidos. Espera un minuto y vuelve a intentarlo.',true);else if(msg.includes('not authorized')||msg.includes('not authorised'))docStatus('Ese email no está autorizado por el servicio de envío de Supabase.',true);else if(msg.includes('redirect'))docStatus('La dirección de retorno de la app no está autorizada.',true);else{let accepted=false;try{accepted=!!(await rpc('family_document_link_recent',{p_code:CODE,p_email:email}))}catch(_){}if(accepted)docStatus('Enlace generado ✓ Supabase lo ha aceptado. Revisa el email y ábrelo en este iPhone.');else docStatus('No se ha podido confirmar el envío. Espera un minuto y vuelve a intentarlo.',true)}}finally{b.disabled=false;b.textContent='Enviar enlace de activación'}}
 async function registerDocumentPasskey(){let adult=localStorage.getItem('family_doc_pending_adult')||$('docAdult').value,b=$('docRegister');b.disabled=true;b.textContent='Activando Face ID…';docStatus('');try{let{error}=await AUTH.auth.registerPasskey();if(error)throw error;await rpcAuth('family_claim_document_access',{p_code:CODE,p_adult_name:adult});localStorage.removeItem('family_doc_pending_adult');docStatus('Face ID activado ✓');await loadDocuments()}catch(e){let msg=String(e.message||e);docStatus(msg.includes('passkey_disabled')?'Falta activar Passkeys en la configuración de Supabase.':msg.includes('already has an account')?'Ese adulto ya tiene otro acceso configurado.':'No se ha podido completar la activación.',true)}finally{b.disabled=false;b.textContent='Activar Face ID'}}
 async function lockDocuments(){DOCS=[];DOC_REVEALED.clear();resetDocument();$('docApp').classList.add('hidden');$('docGate').classList.remove('hidden');$('docLocked').classList.remove('hidden');$('docEnroll').classList.add('hidden');docStatus('Documentación bloqueada.');if(AUTH)await AUTH.auth.signOut()}
 async function saveDocument(){let person=$('docPerson').value,type=$('docType').value,number=$('docNumber').value.trim(),expiry=$('docExpiry').value,b=$('docSave');if(!number||!expiry)return docFormStatus('Completa el número y la fecha de caducidad.',true);b.disabled=true;b.textContent='Guardando…';docFormStatus('Guardando…');try{await rpcAuth('family_save_document',{p_id:EDIT_DOC,p_person_name:person,p_document_type:type,p_document_number:number,p_expires_on:expiry});resetDocument();await loadDocuments();docFormStatus('Guardado ✓')}catch(e){let msg=String(e.message||e);docFormStatus(msg.includes('family_documents_person_name_document_type_key')?'Ya existe ese tipo de documento para esta persona.':'No se ha podido guardar el documento.',true)}finally{b.disabled=false;if(!EDIT_DOC)b.textContent='Guardar documento'}}
@@ -233,23 +234,23 @@ updateNotifyButton();notificationRegistration();
 // Evitamos recargar toda la interfaz mientras alguien está escribiendo.
 function initCompactForms(){[['planform','Cumples y planes','Añadir plan'],['healthform','Salud','Añadir cita'],['routineform','Rutinas','Añadir rutina']].forEach(([id,title,label])=>{let form=$(id),container=form.parentElement,drawer=document.createElement('details'),summary=document.createElement('summary');container.classList.add('compactTools');drawer.className='formDrawer';drawer.id=id+'Drawer';summary.innerHTML=esc(title)+'<span>＋ '+esc(label)+'</span>';drawer.append(summary);container.insertBefore(drawer,form);drawer.append(form)})}
 initCompactForms();
-</script><script src="app-enhancements.js?v=2026.09.20.2"></script>
-<script src="calendar-races-update.js?v=2026.09.20.2"></script>
-<script src="packing.js?v=2026.09.20.2"></script>
-<script src="navigation-fix.js?v=2026.09.20.2"></script>
-<script src="home-dashboard.js?v=2026.09.20.2"></script>
-<script src="home-upcoming-races.js?v=2026.09.20.2"></script>
-<script src="packing-smart.js?v=2026.09.20.2"></script>
-<script src="smart-features.js?v=2026.09.20.2"></script>
-<script src="weekly-auto.js?v=2026.09.20.2"></script>
-<script src="notification-fix.js?v=2026.09.20.2"></script>
-<script src="family-upgrades.js?v=2026.09.20.2"></script>
-<script src="family-upgrades-fix.js?v=2026.09.20.2"></script>
-<script src="section-priority-fix.js?v=2026.09.20.2"></script>
-<script src="tasks.js?v=2026.09.20.2"></script>
-<script src="cars-v2.js?v=2026.09.20.2"></script>
-<script src="family-inbox.js?v=2026.09.20.2"></script>
-<script src="sync-fix.js?v=2026.09.20.2"></script>
-<script src="subscriptions.js?v=2026.09.20.2"></script>
-<script src="stability-core.js?v=2026.09.20.2"></script>
+</script><script src="app-enhancements.js?v=2026.09.20.3"></script>
+<script src="calendar-races-update.js?v=2026.09.20.3"></script>
+<script src="packing.js?v=2026.09.20.3"></script>
+<script src="navigation-fix.js?v=2026.09.20.3"></script>
+<script src="home-dashboard.js?v=2026.09.20.3"></script>
+<script src="home-upcoming-races.js?v=2026.09.20.3"></script>
+<script src="packing-smart.js?v=2026.09.20.3"></script>
+<script src="smart-features.js?v=2026.09.20.3"></script>
+<script src="weekly-auto.js?v=2026.09.20.3"></script>
+<script src="notification-fix.js?v=2026.09.20.3"></script>
+<script src="family-upgrades.js?v=2026.09.20.3"></script>
+<script src="family-upgrades-fix.js?v=2026.09.20.3"></script>
+<script src="section-priority-fix.js?v=2026.09.20.3"></script>
+<script src="tasks.js?v=2026.09.20.3"></script>
+<script src="cars-v2.js?v=2026.09.20.3"></script>
+<script src="family-inbox.js?v=2026.09.20.3"></script>
+<script src="sync-fix.js?v=2026.09.20.3"></script>
+<script src="subscriptions.js?v=2026.09.20.3"></script>
+<script src="stability-core.js?v=2026.09.20.3"></script>
 </body></html>
