@@ -103,8 +103,9 @@ function renderHomeTasks(){
  const now=new Date(),today=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0'),limit=new Date(now);limit.setDate(limit.getDate()+60);const end=limit.getFullYear()+'-'+String(limit.getMonth()+1).padStart(2,'0')+'-'+String(limit.getDate()).padStart(2,'0');
  const open=tasks().filter(x=>!x.is_done&&x.due_date&&x.due_date>=today&&x.due_date<=end).sort(sortOpen);if(!open.length)return;
  const headings=[];let monday=homeTaskMonday(today);for(let i=0;i<10;i++){let d=new Date(monday);d.setDate(d.getDate()+i*7);let z=new Date(d);z.setDate(z.getDate()+6);headings.push(`SEMANA · ${homeTaskFmt(d)} – ${homeTaskFmt(z)}`)}
- const findGroup=header=>[...coming.querySelectorAll('.group')].find(g=>g.querySelector(':scope > .ghead')?.textContent.trim()===header);
- const makeGroup=header=>{const g=document.createElement('div');g.className='group';g.dataset.homeTaskGroup='1';g.innerHTML=`<div class="ghead">${safe(header)}</div><div class="cards"></div>`;const targetIndex=headings.indexOf(header);const next=[...coming.querySelectorAll('.group')].find(x=>{const h=x.querySelector(':scope > .ghead')?.textContent.trim()||'';return headings.indexOf(h)>targetIndex});next?coming.insertBefore(g,next):coming.appendChild(g);return g};
+ const groupHeader=g=>(g.querySelector(':scope > .ghead')?.textContent.trim()||'').replace(/ · ESTA SEMANA$/, '');
+ const findGroup=header=>[...coming.querySelectorAll('.group')].find(g=>groupHeader(g)===header);
+ const makeGroup=header=>{const g=document.createElement('div');g.className='group';g.dataset.homeTaskGroup='1';g.innerHTML=`<div class="ghead">${safe(header)}</div><div class="cards"></div>`;const targetIndex=headings.indexOf(header);const next=[...coming.querySelectorAll('.group')].find(x=>{const h=groupHeader(x);return headings.indexOf(h)>targetIndex});next?coming.insertBefore(g,next):coming.appendChild(g);return g};
  open.forEach(x=>{const header=homeTaskHeader(x.due_date),g=findGroup(header)||makeGroup(header),card=document.createElement('div'),who=assigneeText(x.assignees);card.className='ev homeTaskCard';card.dataset.homeTask=x.id;card.innerHTML=homeTaskDate(x.due_date)+`<div><strong>✅ ${safe(x.title)}</strong><em>Tarea${who!=='Sin asignar'?' · '+safe(who):''}${x.notes?' · '+safe(x.notes):''}</em><div class="homeTaskActions"><button type="button" class="miniBtn" data-home-task-open="${safe(x.id)}">Tareas</button><button type="button" class="miniBtn" data-home-task-wa="${safe(x.id)}">WhatsApp</button></div></div>`;g.querySelector('.cards').appendChild(card)});
  coming.querySelectorAll('[data-home-task-open]').forEach(b=>b.onclick=e=>{e.stopPropagation();openTasks()});
  coming.querySelectorAll('[data-home-task-wa]').forEach(b=>b.onclick=e=>{e.stopPropagation();shareTask(b.dataset.homeTaskWa)});
@@ -130,6 +131,9 @@ function taskEditing(){
  return !!(a&&$t('tasks')?.contains(a)&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName));
 }
 function sync(){makeSection();if(taskEditing())return;const sig=signature();if(sig!==lastSig){lastSig=sig;render()}}
+// Upcoming rebuilds its DOM even when task data has not changed.
+// Restore task cards after every rebuild, independently of the list signature.
+document.addEventListener('family-upcoming-rendered',renderHomeTasks);
 document.addEventListener('family-data-synced',()=>setTimeout(sync,0));
 document.addEventListener('click',e=>{if(e.target.closest?.('#nav button[data-v="tasks"]'))setTimeout(sync,0)});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(sync,120)});
