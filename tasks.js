@@ -7,7 +7,9 @@ const $t=id=>document.getElementById(id);
 const safe=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 let editId=null,lastSig='';
 
-function tasks(){return Array.isArray(window.D?.tasks)?D.tasks:[]}
+// D is a global lexical binding (let), not a property of window.
+// Read it on each render because synchronization replaces the whole object.
+function tasks(){return typeof D!=='undefined'&&Array.isArray(D?.tasks)?D.tasks:[]}
 function assigneesFromValue(v){if(v==='Igor')return['Igor'];if(v==='Mirari')return['Mirari'];if(v==='both')return['Igor','Mirari'];return[]}
 function assigneeValue(a){a=Array.isArray(a)?a:[];if(a.includes('Igor')&&a.includes('Mirari'))return'both';if(a.includes('Igor'))return'Igor';if(a.includes('Mirari'))return'Mirari';return''}
 function assigneeText(a){a=Array.isArray(a)?a:[];if(a.includes('Igor')&&a.includes('Mirari'))return'Igor y Mirari';return a[0]||'Sin asignar'}
