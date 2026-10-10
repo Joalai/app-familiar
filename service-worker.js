@@ -1,4 +1,4 @@
-const APP_PATCH_VERSION='2026.10.11.1';
+const APP_PATCH_VERSION='2026.10.11.2';
 
 self.addEventListener('install',()=>self.skipWaiting());
 
