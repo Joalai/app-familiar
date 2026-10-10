@@ -14,12 +14,7 @@ function optionalHomeCard(x){
  const dateBox=x.event_date?db(x.event_date):approxDateBox(x.sort_date);
  return `<div class="ev homeOptionalRace" data-optional-race-id="${esc(x.id)}">${dateBox}<div><strong>🏃 ${esc(x.title)} <span class="homeOptionalTag">☆ OPCIONAL</span></strong><em>${esc(x.date_text)}${x.place?' · '+mapLink(x.place):''}</em><div class="itemactions"><button type="button" class="miniBtn" data-home-open-races>Ver en Carreras</button></div></div></div>`;
 }
-function routineHomeCard(x){
- const who=(x.member_names||[]).join(', ');
- const clock=x.start_time?x.start_time.slice(0,5)+(x.end_time?'–'+x.end_time.slice(0,5):''):'Hora pendiente';
- return `<div class="ev ${memberClass(x.member_names||[])}" data-detail-routine="${esc(x.id)}" data-date="${esc(x.event_date)}">${db(x.event_date)}<div><strong>${esc(displayTitle(x))}</strong><em>Recurrente · ${esc(clock)}${who?' · '+esc(who):''}${x.place?' · '+mapLink(x.place):''}</em></div></div>`;
-}
-function eventKey(x){return [x._routine_home?'routine':x._school?'school':x._race?'race':'event',x.id||x.title,x._home_date||x.event_date].join('|')}
+function eventKey(x){return [x._school?'school':x._race?'race':'event',x.id||x.title,x._home_date||x.event_date].join('|')}
 function personMatches(x,person){
  if(person==='Todos')return true;
  if(x._optional_home||x._race)return person==='Igor';
@@ -53,7 +48,6 @@ function dailyCount(ds,person){
  (D.events||[]).filter(x=>x.event_date===ds).forEach(x=>add('e|'+x.id,x));
  if(typeof raceEvents==='function')raceEvents().filter(x=>x.event_date===ds).forEach(x=>add('r|'+x.id,{...x,_race:true}));
  optionalRaces().filter(x=>x.event_date===ds).forEach(x=>add('o|'+x.id,{...x,_optional_home:true}));
- try{rf(new Date(ds+'T12:00:00')).forEach(x=>add('rr|'+x.id,x))}catch(e){}
  try{const s=schoolMarker(new Date(ds+'T12:00:00'));if(s)add('s|'+s.title,{...s,_school:true})}catch(e){}
  return items.length;
 }
@@ -87,18 +81,12 @@ rh=function(){
  (D.events||[]).filter(x=>x.event_date&&inRange(x.event_date)&&personMatches(x,person)).forEach(x=>standard.push({...x,_home_date:x.event_date}));
  if(typeof raceEvents==='function')raceEvents().filter(x=>x.event_date&&inRange(x.event_date)&&personMatches({...x,_race:true},person)).forEach(x=>standard.push({...x,_home_date:x.event_date}));
  standard.push(...schoolMarkers(n,normalEnd,new Set(),person));
- // Use the same recurrence rules as the Week and Month views (including school closures).
- if((D.recurring||[]).length)for(let day=n;day<=normalEnd;day=addDays(day,1)){
-   rf(new Date(day+'T12:00:00')).filter(x=>personMatches(x,person)).forEach(x=>{
-     standard.push({...x,event_date:day,_home_date:day,_routine_home:true});
-   });
- }
  const optional=opts.map(x=>({...x,_optional_home:true,_home_date:x.event_date||x.sort_date}));
  const seen=new Set(),all=[];
  [...standard,...optional].sort((a,b)=>a._home_date.localeCompare(b._home_date)||(a.start_time||'99').localeCompare(b.start_time||'99')).forEach(x=>{const k=x._optional_home?'optional|'+x.id:eventKey(x);if(seen.has(k))return;seen.add(k);all.push(x)});
  const g={};all.forEach(x=>{const k=weekKey(x._home_date);(g[k]??=[]).push(x)});
  const thisWeek=weekKey(n);
- const groups=Object.entries(g).map(([k,x])=>{const d=new Date(k+'T12:00:00'),z=new Date(d);z.setDate(z.getDate()+6);const hasOptional=x.some(v=>v._optional_home),exactOptional=x.some(v=>v._optional_home&&v.event_date);const note=hasOptional?`<div class="ghead" style="background:#fffbeb;color:#92400e">${exactOptional?'☆ SEMANA CON CARRERA OPCIONAL · comprueba la carga de agenda':'☆ REFERENCIA APROXIMADA · fecha de carrera pendiente'}</div>`:'';return `<div class="group" data-week-start="${k}"><div class="ghead ${k===thisWeek?'weekNow':''}">SEMANA · ${fmt(d)} – ${fmt(z)}${k===thisWeek?' · ESTA SEMANA':''}</div>${note}<div class="cards">${x.map(v=>(v._optional_home?optionalHomeCard(v):v._routine_home?routineHomeCard(v):homeCard(v)).replace('<div ',`<div data-home-date="${esc(v._home_date)}" `)).join('')}</div></div>`}).join('');
+ const groups=Object.entries(g).map(([k,x])=>{const d=new Date(k+'T12:00:00'),z=new Date(d);z.setDate(z.getDate()+6);const hasOptional=x.some(v=>v._optional_home),exactOptional=x.some(v=>v._optional_home&&v.event_date);const note=hasOptional?`<div class="ghead" style="background:#fffbeb;color:#92400e">${exactOptional?'☆ SEMANA CON CARRERA OPCIONAL · comprueba la carga de agenda':'☆ REFERENCIA APROXIMADA · fecha de carrera pendiente'}</div>`:'';return `<div class="group" data-week-start="${k}"><div class="ghead ${k===thisWeek?'weekNow':''}">SEMANA · ${fmt(d)} – ${fmt(z)}${k===thisWeek?' · ESTA SEMANA':''}</div>${note}<div class="cards">${x.map(v=>(v._optional_home?optionalHomeCard(v):homeCard(v)).replace('<div ',`<div data-home-date="${esc(v._home_date)}" `)).join('')}</div></div>`}).join('');
  $('coming').innerHTML=toolbar(n,person,range)+(groups||'<div class="card pad" id="homeUpcomingEmpty">No hay acontecimientos en este periodo.</div>');
  bindOptionalLinks();bindFilters();
  document.dispatchEvent(new CustomEvent('family-upcoming-rendered'));
