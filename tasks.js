@@ -100,13 +100,17 @@ function renderHomeTasks(){
  const coming=$t('coming');if(!coming)return;
  coming.querySelectorAll('.homeTaskCard').forEach(x=>x.remove());
  coming.querySelectorAll('[data-home-task-group="1"]').forEach(x=>x.remove());
- const now=new Date(),today=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0'),limit=new Date(now);limit.setDate(limit.getDate()+60);const end=limit.getFullYear()+'-'+String(limit.getMonth()+1).padStart(2,'0')+'-'+String(limit.getDate()).padStart(2,'0');
- const open=tasks().filter(x=>!x.is_done&&x.due_date&&x.due_date>=today&&x.due_date<=end).sort(sortOpen);if(!open.length)return;
- const headings=[];let monday=homeTaskMonday(today);for(let i=0;i<10;i++){let d=new Date(monday);d.setDate(d.getDate()+i*7);let z=new Date(d);z.setDate(z.getDate()+6);headings.push(`SEMANA · ${homeTaskFmt(d)} – ${homeTaskFmt(z)}`)}
- const groupHeader=g=>(g.querySelector(':scope > .ghead')?.textContent.trim()||'').replace(/ · ESTA SEMANA$/, '');
- const findGroup=header=>[...coming.querySelectorAll('.group')].find(g=>groupHeader(g)===header);
- const makeGroup=header=>{const g=document.createElement('div');g.className='group';g.dataset.homeTaskGroup='1';g.innerHTML=`<div class="ghead">${safe(header)}</div><div class="cards"></div>`;const targetIndex=headings.indexOf(header);const next=[...coming.querySelectorAll('.group')].find(x=>{const h=groupHeader(x);return headings.indexOf(h)>targetIndex});next?coming.insertBefore(g,next):coming.appendChild(g);return g};
- open.forEach(x=>{const header=homeTaskHeader(x.due_date),g=findGroup(header)||makeGroup(header),card=document.createElement('div'),who=assigneeText(x.assignees);card.className='ev homeTaskCard';card.dataset.homeTask=x.id;card.dataset.homeDate=x.due_date;card.innerHTML=homeTaskDate(x.due_date)+`<div><strong>✅ ${safe(x.title)}</strong><em>Tarea${who!=='Sin asignar'?' · '+safe(who):''}${x.notes?' · '+safe(x.notes):''}</em><div class="homeTaskActions"><button type="button" class="miniBtn" data-home-task-open="${safe(x.id)}">Tareas</button><button type="button" class="miniBtn" data-home-task-wa="${safe(x.id)}">WhatsApp</button></div></div>`;const cards=g.querySelector('.cards'),next=[...cards.children].find(c=>c.dataset.homeDate>x.due_date);cards.insertBefore(card,next||null)});
+ const now=new Date(),today=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+ const period=localStorage.getItem('family_upcoming_range')||'60',person=localStorage.getItem('family_upcoming_person')||'Todos';
+ const limit=new Date(now);if(period!=='all')limit.setDate(limit.getDate()+( ['7','30','60'].includes(period)?Number(period):60 ));
+ const end=period==='all'?null:limit.getFullYear()+'-'+String(limit.getMonth()+1).padStart(2,'0')+'-'+String(limit.getDate()).padStart(2,'0');
+ const open=tasks().filter(x=>!x.is_done&&x.due_date&&x.due_date>=today&&(!end||x.due_date<=end)&&(person==='Todos'||(x.assignees||[]).includes(person))).sort(sortOpen);
+ if(!open.length)return;
+ coming.querySelector('#homeUpcomingEmpty')?.remove();
+ const weekKey=ds=>{const d=homeTaskMonday(ds);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+ const findGroup=ds=>[...coming.querySelectorAll('.group')].find(g=>g.dataset.weekStart===weekKey(ds));
+ const makeGroup=ds=>{const k=weekKey(ds),g=document.createElement('div');g.className='group';g.dataset.homeTaskGroup='1';g.dataset.weekStart=k;g.innerHTML=`<div class="ghead">${safe(homeTaskHeader(ds))}</div><div class="cards"></div>`;const next=[...coming.querySelectorAll('.group')].find(x=>x.dataset.weekStart>k);next?coming.insertBefore(g,next):coming.appendChild(g);return g};
+ open.forEach(x=>{const g=findGroup(x.due_date)||makeGroup(x.due_date),card=document.createElement('div'),who=assigneeText(x.assignees);card.className='ev homeTaskCard';card.dataset.homeTask=x.id;card.dataset.homeDate=x.due_date;card.innerHTML=homeTaskDate(x.due_date)+`<div><strong>✅ ${safe(x.title)}</strong><em>Tarea${who!=='Sin asignar'?' · '+safe(who):''}${x.notes?' · '+safe(x.notes):''}</em><div class="homeTaskActions"><button type="button" class="miniBtn" data-home-task-open="${safe(x.id)}">Tareas</button><button type="button" class="miniBtn" data-home-task-wa="${safe(x.id)}">WhatsApp</button></div></div>`;const cards=g.querySelector('.cards'),next=[...cards.children].find(c=>c.dataset.homeDate>x.due_date);cards.insertBefore(card,next||null)});
  coming.querySelectorAll('[data-home-task-open]').forEach(b=>b.onclick=e=>{e.stopPropagation();openTasks()});
  coming.querySelectorAll('[data-home-task-wa]').forEach(b=>b.onclick=e=>{e.stopPropagation();shareTask(b.dataset.homeTaskWa)});
 }
